@@ -1,68 +1,80 @@
-/* Generator CSS */
-
-.generator-container {
-    display: flex;
-}
-
-.generator {
-    border: 1px solid black;
-    background-color: #4a8600;
-}
-
-.color-select {
-    display: flex;
-    flex-flow: column wrap;
-}
-
-.color {
-    display: flex;
-}
-
-.swatch {
-    width: 24px;
-    height: 24px;
-    margin: 10px;
-    border: 1px solid black;
-}
-
-.swatch:hover {
-    border: 2px solid red;
-    margin: 9px;
-}
-
-.swatch-selected {
-    width: 24px;
-    height: 24px;
-    margin: 9px;
-    border: 2px solid blue;
-}
-
-.color p {
-    align-self: center;
-}
-
-.color #transparent {
-    background: linear-gradient(#facdcd, #ff9696)
-}
-
-.color #white {
-    background-color: white;
-}
-
-.color #black {
-    background-color: black;
-}
-
-.generate-btn {
-    height: 24px;
-    margin: 10px;
-    align-self: center;
-}
-
-/* Game CSS */
-
-.map {
-    border: 1px solid black;
-    background-color: #9FD162;
-    color: #b600c7
-  }
+body {
+            margin: 0;
+            padding: 0;
+            background: #111;
+            font-family: system-ui, Segoe UI, Roboto, Helvetica, Arial;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #game-container {
+            position: relative;
+            width: 800px;
+            height: 600px;
+        }
+        
+        #game {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        #overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2;
+            pointer-events: none;
+        }
+        
+        .light {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(
+                circle, 
+                rgba(255, 255, 255, 0.4) 0%, 
+                rgba(255, 255, 255, 0.2) 40%, 
+                transparent 70%
+            );
+            transform: translate(-50%, -50%);
+            z-index: 3;
+            pointer-events: none;
+        }
+        
+        #controls {
+            position: absolute;
+            right: 12px;
+            top: 12px;
+            background: rgba(255, 255, 255, 0.06);
+            color: #eee;
+            padding: 8px 10px;
+            border-radius: 8px;
+            backdrop-filter: blur(4px);
+            z-index: 40;
+            font-size: 13px;
+        }
+        
+        #controls input[type="range"] {
+            vertical-align: middle;
+            width: 100px;
+        }
+        
+        #controls button {
+            margin-left: 8px;
+            padding: 6px 8px;
+            font-size: 13px;
+            cursor: pointer;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
