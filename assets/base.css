@@ -42,7 +42,8 @@
 }
 
 .color #transparent {
-    background: linear-gradient(#facdcd, #ff9696)
+    background: linear-gradient(#facdcd, #ff9696);
+    /* color: rgb(255, 0, 225); */
 }
 
 .color #white {
@@ -64,5 +65,84 @@
 .map {
     border: 1px solid black;
     background-color: #9FD162;
-    color: #b600c7
+    color: #b600c7;
+    /* color: rgba(255, 0, 0, 0.5); */
   }
+
+/* #overlay { */
+#map {
+/* .map { */
+	position: absolute;
+
+	inset: 0;
+	background: rgba(0, 0, 0, 1);
+	-webkit-mask-image: radial-gradient(
+		circle var(--r, 110px) at var(--x, 50%) var(--y, 50%),
+		transparent 0%,
+		transparent 60%,
+		black 100%
+	);
+	mask-image: radial-gradient(
+		circle var(--r, 110px) at var(--x, 50%) var(--y, 50%),
+		transparent 0%,
+		transparent 60%,
+		black 100%
+	);
+	transition: -webkit-mask-position 0.06s linear;
+	transition: mask-position 0.06s linear;
+	pointer-events: auto;
+    pointer-events: none;
+
+
+
+      /* position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 1);
+  -webkit-mask-image: radial-gradient(
+    circle var(--r, 110px) at var(--x, 50%) var(--y, 50%),
+    transparent 0%,
+    transparent 60%,
+    black 100%
+  );
+  mask-image: radial-gradient(
+    circle var(--r, 110px) at var(--x, 50%) var(--y, 50%),
+    transparent 0%,
+    transparent 60%,
+    black 100%
+  );
+  transition: -webkit-mask-position 0.06s linear;
+  transition: mask-position 0.06s linear;
+  pointer-events: none;
+  z-index: 10; Убедитесь, что overlay поверх других элементов */
+}  
+
+
+        /* #map {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            pointer-events: none;
+            z-index: 10;
+            transform: translate(-50%, -50%);
+            display: none;
+        }
+        
+        #map::before, #map::after {
+            content: "";
+            position: absolute;
+            background: #4cc9f0;
+        }
+        
+        #map::before {
+            width: 20px;
+            height: 2px;
+            top: 9px;
+            left: 0;
+        }
+        
+        #map::after {
+            width: 2px;
+            height: 20px;
+            left: 9px;
+            top: 0;
+        } */
