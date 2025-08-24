@@ -116,7 +116,9 @@
   z-index: 10; Убедитесь, что overlay поверх других элементов */
 }  
 
-
+.game-canvas-container {
+     position: absolute;
+}
         /* #map {
             position: absolute;
             width: 20px;
