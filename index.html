@@ -1,29 +1,13 @@
     <link href="assets/base.css" rel="stylesheet" />
-    <div class="generator-container">
-        <canvas class="generator" width="256" height="160"></canvas>
-        <div class="color-select">
-            <div class="color">
-                <div class="swatch" id="transparent"></div>
-                <p>Eraser</p>
-            </div>
-            <div class="color">
-                <div class="swatch" id="white"></div>
-                <p>Skeleton</p>
-            </div>
-            <div class="color">
-                <div class="swatch" id="black"></div>
-                <p>Wall</p>
-            </div>
+    <div id="game-container">
+        <canvas id="game" width="800" height="600"></canvas>
+        <div id="overlay"></div>
+        <div id="controls">
+            <label>
+                Радиус света: 
+                <input type="range" id="radius" min="50" max="200" value="100">
+            </label>
+            <button id="toggle">Переключить свет</button>
         </div>
     </div>
-    <button class="generate-btn">Generate Map</button>
-    <br/>
-    <canvas class="map" width="640px" height="400px"></canvas>
-    <ol>
-        <li>Draw a map on the small upper canvas using the colors on the right.</li>
-        <li>Press 'Generate Map' and the walls and skeletons will be placed according to your drawing.</li>
-        <li>Skeletons will follow the mouse while it's on the canvas.</li>
-        <li>Click when the circle appears to kill or revive the skeleton.</li>
-        <li>The wall will change color based on where the skeleton is. If it's within the width of the wall, it will turn red. Within the height, it will turn blue. If it touches the wall, the wall will become purplish red or purplish blue based on where it's touching.</li>
-    </ol>
     <script src="assets/base.js"></script>
