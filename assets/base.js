@@ -374,15 +374,32 @@ class Skeleton {
     if (this.vector < this.width) {
       gameCtx.beginPath();
       gameCtx.arc(this.x+(this.width/2), this.y+(this.height/8), this.width, 0, 2 * Math.PI);
-      gameCtx.fillStyle = "rgb(129, 176, 72, 0.5)";
+      gameCtx.fillStyle = "rgba(255, 0, 0, 0.5)";
+    //   тут
+      gameCtx.fill();
+
+// 
+
+
+
+const spotlight = document.querySelector('#map');
+spotlight.style.setProperty('--x', `${this.x + (this.width / 2)}px`);
+spotlight.style.setProperty('--y', `${this.y + (this.height / 8)}px`);
+spotlight.style.setProperty('--r', `${this.width}px`);
+
+
+
+
+
+// 
+
+    }
+    if (this.vector < this.width/4) {
+      gameCtx.beginPath();
+      gameCtx.arc(this.x+(this.width/2), this.y+(this.height/8), this.width/4, 0, 2 * Math.PI);
+      gameCtx.fillStyle = "rgb(87, 139, 40, 0.5)";
       gameCtx.fill();
     }
-    // if (this.vector < this.width/4) {
-    //   gameCtx.beginPath();
-    //   gameCtx.arc(this.x+(this.width/2), this.y+(this.height/8), this.width/4, 0, 2 * Math.PI);
-    //   gameCtx.fillStyle = "rgb(87, 139, 40, 0.5)";
-    //   gameCtx.fill();
-    // }
     //draw a specific frame from the spritesheet
     gameCtx.drawImage(this.img,
                 this.currentLoopIndex * this.rawWidth, this.direction * this.rawHeight, this.rawWidth, this.rawHeight,
@@ -507,4 +524,67 @@ function generateMap(e) {
     }
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+const overlay = document.getElementById("map");
+const radiusInput = document.getElementById("radius");
+const toggle = document.getElementById("toggle");
+const customCursor = document.getElementById("custom-cursor");
+
+let radius = Number(radiusInput.value);
+overlay.style.setProperty("--r", radius + "px");
+
+radiusInput.addEventListener("input", (e) => {
+	radius = Number(e.target.value);
+	overlay.style.setProperty("--r", radius + "px");
+});
+
+function setPos(clientX, clientY) {
+	const rect = overlay.getBoundingClientRect();
+
+	const maskX = clientX - rect.left;
+	const maskY = clientY - rect.top;
+	overlay.style.setProperty("--x", maskX + "px");
+	overlay.style.setProperty("--y", maskY + "px");
+
+	customCursor.style.transform = `translate(${clientX}px, ${clientY}px)`;
+}
+
+overlay.addEventListener("mousemove", (e) => setPos(e.clientX, e.clientY));
+overlay.addEventListener(
+	"touchmove",
+	(e) => {
+		if (e.touches && e.touches[0]) {
+			setPos(e.touches[0].clientX, e.touches[0].clientY);
+		}
+		e.preventDefault();
+	},
+	{ passive: false }
+);
+
+setPos(window.innerWidth / 2, window.innerHeight / 2);
+
+let passthrough = false;
+let flickerTime = 0;
+
+function animateFlicker() {
+	flickerTime += 0.05;
+	const flickerOffset = Math.sin(flickerTime * 3) * 3;
+	overlay.style.setProperty("--r", radius + flickerOffset + "px");
+	requestAnimationFrame(animateFlicker);
+}
+
+animateFlicker();
+
+
 });
