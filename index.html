@@ -1,47 +1,149 @@
-    <link href="assets/base.css" rel="stylesheet" />
-    <div class="generator-container">
-        <canvas class="generator" width="256" height="160"></canvas>
-        <div class="color-select">
-            <div class="color">
-                <div class="swatch" id="transparent"></div>
-                <p>Eraser</p>
-            </div>
-            <div class="color">
-                <div class="swatch" id="white"></div>
-                <p>Skeleton</p>
-            </div>
-            <div class="color">
-                <div class="swatch" id="black"></div>
-                <p>Wall</p>
-            </div>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8' />
+<script src='assets/index.global.js'></script>
+<script>
+
+  document.addEventListener('DOMContentLoaded', function() {
+
+    /* initialize the external events
+    -----------------------------------------------------------------*/
+
+    var containerEl = document.getElementById('external-events-list');
+    new FullCalendar.Draggable(containerEl, {
+      itemSelector: '.fc-event',
+      eventData: function(eventEl) {
+        return {
+          title: eventEl.innerText.trim()
+        }
+      }
+    });
+
+    //// the individual way to do it
+    // var containerEl = document.getElementById('external-events-list');
+    // var eventEls = Array.prototype.slice.call(
+    //   containerEl.querySelectorAll('.fc-event')
+    // );
+    // eventEls.forEach(function(eventEl) {
+    //   new FullCalendar.Draggable(eventEl, {
+    //     eventData: {
+    //       title: eventEl.innerText.trim(),
+    //     }
+    //   });
+    // });
+
+    /* initialize the calendar
+    -----------------------------------------------------------------*/
+
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+      headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+      },
+      editable: true,
+      droppable: true, // this allows things to be dropped onto the calendar
+      drop: function(arg) {
+        // is the "remove after drop" checkbox checked?
+        if (document.getElementById('drop-remove').checked) {
+          // if so, remove the element from the "Draggable Events" list
+          arg.draggedEl.parentNode.removeChild(arg.draggedEl);
+        }
+      }
+    });
+    calendar.render();
+
+  });
+
+</script>
+<style>
+
+  body {
+    margin-top: 40px;
+    font-size: 14px;
+    font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+  }
+
+  #external-events {
+    position: fixed;
+    left: 20px;
+    top: 20px;
+    width: 150px;
+    padding: 0 10px;
+    border: 1px solid #ccc;
+    background: #eee;
+    text-align: left;
+  }
+
+  #external-events h4 {
+    font-size: 16px;
+    margin-top: 0;
+    padding-top: 1em;
+  }
+
+  #external-events .fc-event {
+    margin: 3px 0;
+    cursor: move;
+  }
+
+  #external-events p {
+    margin: 1.5em 0;
+    font-size: 11px;
+    color: #666;
+  }
+
+  #external-events p input {
+    margin: 0;
+    vertical-align: middle;
+  }
+
+  #calendar-wrap {
+    margin-left: 200px;
+  }
+
+  #calendar {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+</style>
+</head>
+<body>
+  <div id='wrap'>
+
+    <div id='external-events'>
+      <h4>Draggable Events</h4>
+
+      <div id='external-events-list'>
+        <div class='fc-event fc-h-event fc-daygrid-event fc-daygrid-block-event'>
+          <div class='fc-event-main'>My Event 1</div>
         </div>
+        <div class='fc-event fc-h-event fc-daygrid-event fc-daygrid-block-event'>
+          <div class='fc-event-main'>My Event 2</div>
+        </div>
+        <div class='fc-event fc-h-event fc-daygrid-event fc-daygrid-block-event'>
+          <div class='fc-event-main'>My Event 3</div>
+        </div>
+        <div class='fc-event fc-h-event fc-daygrid-event fc-daygrid-block-event'>
+          <div class='fc-event-main'>My Event 4</div>
+        </div>
+        <div class='fc-event fc-h-event fc-daygrid-event fc-daygrid-block-event'>
+          <div class='fc-event-main'>My Event 5</div>
+        </div>
+      </div>
+
+      <p>
+        <input type='checkbox' id='drop-remove' />
+        <label for='drop-remove'>remove after drop</label>
+      </p>
     </div>
-    <button class="generate-btn">Generate Map</button>
-    <br/>
 
-        <div class="game-canvas-container">
-                        <div id="map"></div>  
-            <canvas class="map" width="640px" height="400px"></canvas>
-        </div>
-    <ol>
-        
-    </ol>
-
-
-    <div id="wrap">
-        <iframe id="dungeon" src="https://watabou.github.io/one-page-dungeon/?seed=1022591351" frameborder="0"></iframe>
-
-        <div id="overlay"></div>
-
-        <div id="custom-cursor">
-            <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24">
-                <path fill="#f9aa47" d="M6 20h12q.425 0 .713-.288T19 19H5q0 .425.288.713T6 20m6-12q-1.2 0-2-.837t-.75-2.038q.05-1.3.913-2.287T12 1q.975.85 1.838 1.838t.912 2.287q.05 1.2-.75 2.038T12 8m-1 9h2v-6h-2zm1-11q.325 0 .538-.225t.212-.55q0-.425-.238-.775T12 3.775q-.275.325-.513.675t-.237.775q0 .325.213.55T12 6m8.25 11q.325 0 .538-.213T21 16.25t-.213-.537t-.537-.213t-.537.213t-.213.537t.213.538t.537.212M18 22H6q-1.25 0-2.125-.875T3 19v-2h6V9h6v8h2.6q-.05-.2-.075-.375t-.025-.375q0-1.15.8-1.95t1.95-.8t1.95.8t.8 1.95q0 .95-.562 1.675T21 18.9v.1q0 1.25-.875 2.125T18 22m-7-5h2zm1-12.1" />
-            </svg>
-        </div>
-
-        <div id="controls">
-            <label><input type="range" id="radius" min="40" max="300" value="110"> radius</label>
-        </div>
+    <div id='calendar-wrap'>
+      <div id='calendar'></div>
     </div>
 
-    <script src="assets/base.js"></script>
+  </div>
+</body>
+</html>
