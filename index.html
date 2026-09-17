@@ -43,6 +43,24 @@
   a { color: var(--accent); text-decoration: none; }
   a:hover { color: var(--accent-2); text-decoration: underline; }
 
+  /* ---------- ФОН: САМОИГРАЮЩАЯСЯ ЗМЕЙКА ---------- */
+  #snake-bg {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.55;
+    display: block;
+  }
+
+  /* Контент — над змейкой */
+  #app {
+    position: relative;
+    z-index: 1;
+  }
+
   /* ---------- HEADER ---------- */
   .hero {
     max-width: 1080px;
@@ -116,6 +134,7 @@
     text-transform: uppercase;
     color: var(--dim);
     margin: 48px 0 18px;
+    transition: color .25s ease;
   }
 
   .section-title::after {
@@ -123,6 +142,7 @@
     flex: 1;
     height: 1px;
     background: linear-gradient(90deg, var(--line), transparent);
+    transition: background .25s ease;
   }
 
   /* ---------- TIP CARD ---------- */
@@ -134,7 +154,8 @@
     margin-bottom: 16px;
     position: relative;
     overflow: hidden;
-    transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+    transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease,
+                background .25s ease;
   }
 
   .tip:hover {
@@ -150,6 +171,7 @@
     width: 3px;
     background: linear-gradient(180deg, var(--accent), transparent);
     opacity: 0.7;
+    transition: opacity .25s ease;
   }
 
   .tip.q::before    { background: linear-gradient(180deg, var(--accent-2), transparent); }
@@ -174,6 +196,7 @@
     font-size: 22px;
     background: rgba(184, 146, 255, 0.12);
     border: 1px solid rgba(184, 146, 255, 0.25);
+    transition: background .25s ease, border-color .25s ease;
   }
 
   .tip.q .icon    { background: rgba(255, 203, 107, 0.12); border-color: rgba(255,203,107,.3); }
@@ -367,16 +390,77 @@
   ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
   /* ============================================================
-     РЕДАКТОР page-data (плашка снизу)
+     РЕЖИМ «ПРОЗРАЧНЫЕ БЛОКИ»
+     — карточки и заголовки секций почти сливаются с фоном,
+       чтобы была видна змейка.
      ============================================================ */
-  #editor-toggle {
+  body.transparent-blocks .tip {
+    background: rgba(20, 15, 40, 0.06);
+    border-color: rgba(50, 42, 92, 0.18);
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+  body.transparent-blocks .tip::before {
+    opacity: 0.18;
+  }
+  body.transparent-blocks .tip:hover {
+    background: rgba(20, 15, 40, 0.14);
+    border-color: rgba(184, 146, 255, 0.22);
+    box-shadow: 0 10px 26px rgba(0,0,0,.25);
+  }
+  body.transparent-blocks .tip .icon {
+    background: rgba(184, 146, 255, 0.05);
+    border-color: rgba(184, 146, 255, 0.12);
+  }
+  body.transparent-blocks .tip.q .icon    { background: rgba(255, 203, 107, 0.05); border-color: rgba(255,203,107,.12); }
+  body.transparent-blocks .tip.warn .icon { background: rgba(255, 122, 144, 0.05); border-color: rgba(255,122,144,.12); }
+  body.transparent-blocks .tip.ok .icon   { background: rgba(126, 224, 160, 0.05); border-color: rgba(126,224,160,.12); }
+  body.transparent-blocks .tip.info .icon { background: rgba(102, 224, 192, 0.05); border-color: rgba(102,224,192,.12); }
+
+  body.transparent-blocks .answer {
+    background: rgba(255,255,255,0.015);
+    border-color: rgba(50, 42, 92, 0.4);
+  }
+  body.transparent-blocks .callout {
+    background: rgba(255, 122, 144, 0.03);
+  }
+  body.transparent-blocks .callout.ok   { background: rgba(126, 224, 160, 0.03); }
+  body.transparent-blocks .callout.note { background: rgba(255, 203, 107, 0.03); }
+  body.transparent-blocks .quote {
+    background: rgba(184, 146, 255, 0.03);
+  }
+  body.transparent-blocks .link-pill {
+    background: rgba(184, 146, 255, 0.04);
+    border-color: rgba(184, 146, 255, 0.14);
+  }
+  body.transparent-blocks .link-pill:hover {
+    background: rgba(184, 146, 255, 0.12);
+    border-color: var(--accent);
+  }
+
+  body.transparent-blocks .section-title {
+    color: rgba(111, 106, 148, 0.55);
+  }
+  body.transparent-blocks .section-title::after {
+    background: linear-gradient(90deg, rgba(50, 42, 92, 0.4), transparent);
+  }
+
+  /* ============================================================
+     КНОПКИ УПРАВЛЕНИЯ (снизу справа)
+     ============================================================ */
+  #controls {
     position: fixed;
     bottom: 20px;
     right: 20px;
     z-index: 100;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    transition: opacity .2s ease;
+  }
+
+  #controls button {
     padding: 12px 20px;
-    background: linear-gradient(135deg, var(--accent) 0%, #8b5cf6 100%);
-    color: #ffffff;
     border: none;
     border-radius: 999px;
     font-family: inherit;
@@ -384,8 +468,14 @@
     font-weight: 700;
     letter-spacing: 0.02em;
     cursor: pointer;
+    transition: transform .15s ease, box-shadow .15s ease, background .2s ease;
+    white-space: nowrap;
+  }
+
+  #editor-toggle {
+    background: linear-gradient(135deg, var(--accent) 0%, #8b5cf6 100%);
+    color: #ffffff;
     box-shadow: 0 10px 30px rgba(184, 146, 255, 0.45);
-    transition: transform .15s ease, box-shadow .15s ease, opacity .2s ease;
   }
   #editor-toggle:hover {
     transform: translateY(-2px);
@@ -393,8 +483,29 @@
   }
   #editor-toggle:active { transform: translateY(0); }
 
-  body.editor-open #editor-toggle { opacity: 0; pointer-events: none; }
+  #transparency-toggle {
+    background: rgba(30, 24, 56, 0.85);
+    color: var(--text);
+    border: 1px solid var(--line);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  }
+  #transparency-toggle:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent);
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.45);
+  }
+  #transparency-toggle:active { transform: translateY(0); }
 
+  #transparency-toggle.active {
+    background: linear-gradient(135deg, var(--accent-3) 0%, #3aa088 100%);
+    color: #06241d;
+    border-color: transparent;
+  }
+
+  body.editor-open #controls { opacity: 0; pointer-events: none; }
+
+  /* ---------- Редактор ---------- */
   #editor-panel {
     position: fixed;
     left: 0; right: 0; bottom: 0;
@@ -495,20 +606,29 @@
   #editor-status.ok  { color: var(--success); }
   #editor-status.err { color: var(--danger); }
 
-  @media (max-width: 600px) {
+  @media (max-width: 700px) {
     #editor-panel { height: 85vh; }
-    #editor-toggle { bottom: 14px; right: 14px; padding: 11px 16px; font-size: 13px; }
+    #controls { bottom: 14px; right: 14px; gap: 8px; }
+    #controls button { padding: 10px 14px; font-size: 12.5px; }
+    #snake-bg { opacity: 0.35; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero .dice { animation: none; }
+    #snake-bg { opacity: 0.2; }
   }
 </style>
 </head>
 <body>
+
+<!-- Фоновая самоиграющаяся змейка -->
+<canvas id="snake-bg" aria-hidden="true"></canvas>
 
 <!-- Сюда рендерится вся страница -->
 <div id="app"></div>
 
 <!-- ============================================================
      РЕДАКТИРУЕМЫЕ ДАННЫЕ (page-data)
-     Меняй здесь или через плашку снизу — результат одинаковый.
      ============================================================ -->
 <script id="page-data" type="application/json">
 {
@@ -752,9 +872,14 @@
 </script>
 
 <!-- ============================================================
-     ПЛАШКА + ПАНЕЛЬ РЕДАКТОРА
+     КНОПКИ УПРАВЛЕНИЯ
      ============================================================ -->
-<button id="editor-toggle" type="button">✎ Редактировать данные</button>
+<div id="controls">
+  <button id="transparency-toggle" type="button" title="Почти прозрачные карточки, чтобы была видна змейка">
+    👁 Прозрачные блоки
+  </button>
+  <button id="editor-toggle" type="button">✎ Редактировать данные</button>
+</div>
 
 <div id="editor-panel" role="dialog" aria-label="Редактор page-data">
   <div class="editor-header">
@@ -770,14 +895,18 @@
 </div>
 
 <!-- ============================================================
-     РЕНДЕРЕР + ЛОГИКА РЕДАКТОРА
+     РЕНДЕРЕР + ЛОГИКА + ЗМЕЙКА
      ============================================================ -->
 <script>
 (function () {
   "use strict";
 
+  /* ============================================================
+     1. РЕНДЕРЕР СТРАНИЦЫ ИЗ page-data
+     ============================================================ */
   var ORIGINAL_RAW = document.getElementById('page-data').textContent;
-  var STORAGE_KEY  = 'dnd-page-data';
+  var STORAGE_KEY      = 'dnd-page-data';
+  var TRANSP_KEY       = 'dnd-transparent-blocks';
 
   var app       = document.getElementById('app');
   var toggleBtn = document.getElementById('editor-toggle');
@@ -787,10 +916,10 @@
   var btnApply  = document.getElementById('editor-apply');
   var btnReset  = document.getElementById('editor-reset');
   var btnClose  = document.getElementById('editor-close');
+  var transBtn  = document.getElementById('transparency-toggle');
 
   var currentData = null;
 
-  /* ---------- мелкий помощник ---------- */
   function el(tag, cls, html) {
     var node = document.createElement(tag);
     if (cls) node.className = cls;
@@ -798,7 +927,6 @@
     return node;
   }
 
-  /* ---------- ссылки-таблетки ---------- */
   function renderLinks(items) {
     var wrap = el('div', 'links');
     items.forEach(function (l) {
@@ -812,7 +940,6 @@
     return wrap;
   }
 
-  /* ---------- один блок внутри карточки ---------- */
   function renderBlock(b) {
     if (!b || !b.type) return null;
 
@@ -821,32 +948,25 @@
       if (b.style) p.setAttribute('style', b.style);
       return p;
     }
-
     if (b.type === 'links') return renderLinks(b.items || []);
-
     if (b.type === 'callout') {
       var v = b.variant || 'danger';
       var cls = (v === 'danger') ? 'callout' : 'callout ' + v;
       return el('div', cls, b.html);
     }
-
     if (b.type === 'answer') return el('div', 'answer', b.html);
-
     if (b.type === 'quote') {
       return el('blockquote', 'quote',
         b.html + ' <span class="q-author">— ' + b.author + '</span>');
     }
-
     if (b.type === 'ul') {
       var ul = el('ul', b.className || null);
       (b.items || []).forEach(function (li) { ul.appendChild(el('li', null, li)); });
       return ul;
     }
-
     return null;
   }
 
-  /* ---------- одна карточка ---------- */
   function renderTip(item) {
     var cls = 'tip' + (item.type ? ' ' + item.type : '');
     var tip = el('article', cls);
@@ -865,16 +985,13 @@
       var node = renderBlock(b);
       if (node) tip.appendChild(node);
     });
-
     return tip;
   }
 
-  /* ---------- отрисовка всей страницы ---------- */
   function render(data) {
     currentData = data;
     app.innerHTML = '';
 
-    /* hero */
     var hero = el('header', 'hero');
     if (data.hero) {
       if (data.hero.dice)  hero.appendChild(el('div', 'dice', data.hero.dice));
@@ -884,11 +1001,9 @@
     }
     app.appendChild(hero);
 
-    /* main */
     var main = el('main', 'container');
     (data.sections || []).forEach(function (section) {
       main.appendChild(el('div', 'section-title', section.title || ''));
-
       if (section.grid) {
         var grid = el('div', 'grid-2');
         (section.items || []).forEach(function (item) {
@@ -903,23 +1018,18 @@
     });
     app.appendChild(main);
 
-    /* footer */
     app.appendChild(el('footer', null, data.footer || ''));
   }
 
-  /* ---------- первичная загрузка ---------- */
   function loadInitial() {
     var saved = null;
     try { saved = localStorage.getItem(STORAGE_KEY); } catch (e) {}
     var raw = saved || ORIGINAL_RAW;
-    try {
-      render(JSON.parse(raw));
-    } catch (e) {
-      render(JSON.parse(ORIGINAL_RAW));
-    }
+    try { render(JSON.parse(raw)); }
+    catch (e) { render(JSON.parse(ORIGINAL_RAW)); }
   }
 
-  /* ---------- работа панели ---------- */
+  /* -------- редактор -------- */
   function setStatus(text, kind) {
     statusEl.textContent = text;
     statusEl.className = kind || '';
@@ -941,18 +1051,10 @@
   function applyEdits() {
     var text = textarea.value;
     var data;
-    try {
-      data = JSON.parse(text);
-    } catch (e) {
-      setStatus('✗ Ошибка JSON: ' + e.message, 'err');
-      return;
-    }
-    try {
-      render(data);
-    } catch (e) {
-      setStatus('✗ Ошибка отрисовки: ' + e.message, 'err');
-      return;
-    }
+    try { data = JSON.parse(text); }
+    catch (e) { setStatus('✗ Ошибка JSON: ' + e.message, 'err'); return; }
+    try { render(data); }
+    catch (e) { setStatus('✗ Ошибка отрисовки: ' + e.message, 'err'); return; }
     try { localStorage.setItem(STORAGE_KEY, text); } catch (e) {}
     setStatus('✓ Применено и сохранено в браузере', 'ok');
     setTimeout(closePanel, 450);
@@ -966,7 +1068,6 @@
     setStatus('↺ Сброшено к исходному page-data', 'ok');
   }
 
-  /* ---------- события ---------- */
   toggleBtn.addEventListener('click', openPanel);
   btnClose.addEventListener('click', closePanel);
   btnApply.addEventListener('click', applyEdits);
@@ -989,8 +1090,280 @@
     }
   });
 
-  /* ---------- поехали ---------- */
+  /* -------- кнопка «прозрачные блоки» -------- */
+  function applyTransparency(on) {
+    if (on) document.body.classList.add('transparent-blocks');
+    else    document.body.classList.remove('transparent-blocks');
+
+    if (transBtn) {
+      transBtn.classList.toggle('active', !!on);
+      transBtn.innerHTML = on
+        ? '👁 Прозрачные блоки: вкл'
+        : '👁 Прозрачные блоки';
+      transBtn.title = on
+        ? 'Вернуть плотный фон карточек'
+        : 'Сделать карточки почти прозрачными (будет видна змейка)';
+    }
+  }
+
+  var transSaved = false;
+  try { transSaved = localStorage.getItem(TRANSP_KEY) === '1'; } catch (e) {}
+  applyTransparency(transSaved);
+
+  if (transBtn) {
+    transBtn.addEventListener('click', function () {
+      var on = !document.body.classList.contains('transparent-blocks');
+      applyTransparency(on);
+      try { localStorage.setItem(TRANSP_KEY, on ? '1' : '0'); } catch (e) {}
+    });
+  }
+
   loadInitial();
+
+  /* ============================================================
+     2. ФОНОВАЯ САМОИГРАЮЩАЯСЯ ЗМЕЙКА
+     ============================================================ */
+  (function snakeBackground() {
+    var canvas = document.getElementById('snake-bg');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+
+    var DPR = 1, W = 0, H = 0;
+    var CELL = 28, COLS = 0, ROWS = 0;
+
+    var snake = [];
+    var apple = null;
+    var hunger = 0;
+
+    var BASE_LEN = 6;
+    var MAX_LEN  = 42;
+    var STEP_MS  = 85;
+
+    var reduced = window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function resize() {
+      DPR = Math.min(2, window.devicePixelRatio || 1);
+      W = window.innerWidth;
+      H = window.innerHeight;
+      canvas.width  = Math.floor(W * DPR);
+      canvas.height = Math.floor(H * DPR);
+      canvas.style.width  = W + 'px';
+      canvas.style.height = H + 'px';
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+
+      CELL = Math.max(20, Math.min(34, Math.round(Math.min(W, H) / 26)));
+      COLS = Math.ceil(W / CELL);
+      ROWS = Math.ceil(H / CELL);
+
+      resetSnake();
+    }
+
+    function resetSnake() {
+      var cx = Math.floor(COLS / 2);
+      var cy = Math.floor(ROWS / 2);
+      snake = [];
+      for (var i = 0; i < BASE_LEN; i++) {
+        snake.push({ x: cx - i, y: cy });
+      }
+      hunger = 0;
+      apple = spawnApple();
+    }
+
+    function occupied(x, y) {
+      for (var i = 0; i < snake.length; i++) {
+        if (snake[i].x === x && snake[i].y === y) return true;
+      }
+      return false;
+    }
+
+    function spawnApple() {
+      var tries = 0;
+      while (tries++ < 400) {
+        var x = Math.floor(Math.random() * COLS);
+        var y = Math.floor(Math.random() * ROWS);
+        if (!occupied(x, y)) return { x: x, y: y };
+      }
+      return null;
+    }
+
+    function bfsFrom(goal) {
+      var total = COLS * ROWS;
+      var dist = new Int32Array(total);
+      for (var i = 0; i < total; i++) dist[i] = -1;
+
+      var body = new Uint8Array(total);
+      for (var s = 0; s < snake.length - 1; s++) {
+        body[snake[s].y * COLS + snake[s].x] = 1;
+      }
+
+      var start = goal.y * COLS + goal.x;
+      dist[start] = 0;
+      var queue = [start];
+      var head = 0;
+
+      while (head < queue.length) {
+        var idx = queue[head++];
+        var cx = idx % COLS;
+        var cy = (idx - cx) / COLS;
+        var nd = dist[idx] + 1;
+
+        if (cx + 1 < COLS) push(cx + 1, cy, nd);
+        if (cx - 1 >= 0)   push(cx - 1, cy, nd);
+        if (cy + 1 < ROWS) push(cx, cy + 1, nd);
+        if (cy - 1 >= 0)   push(cx, cy - 1, nd);
+      }
+
+      function push(x, y, nd) {
+        var j = y * COLS + x;
+        if (dist[j] !== -1) return;
+        if (body[j]) return;
+        dist[j] = nd;
+        queue.push(j);
+      }
+
+      return dist;
+    }
+
+    function safeMoves() {
+      var dirs = [{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}];
+      var bodyMap = {};
+      for (var i = 0; i < snake.length - 1; i++) {
+        bodyMap[snake[i].x + ',' + snake[i].y] = 1;
+      }
+      var hx = snake[0].x, hy = snake[0].y;
+      var out = [];
+      for (var d = 0; d < 4; d++) {
+        var nx = hx + dirs[d].x;
+        var ny = hy + dirs[d].y;
+        if (nx < 0 || ny < 0 || nx >= COLS || ny >= ROWS) continue;
+        if (bodyMap[nx + ',' + ny]) continue;
+        out.push({ x: nx, y: ny });
+      }
+      return out;
+    }
+
+    function step() {
+      hunger++;
+
+      if (hunger > 400) { apple = spawnApple(); hunger = 0; }
+      if (!apple) apple = spawnApple();
+      if (!apple) { resetSnake(); return; }
+
+      var dist = bfsFrom(apple);
+      var hx = snake[0].x, hy = snake[0].y;
+
+      var bestD = Infinity;
+      var candidates = [];
+      var dirs = [{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}];
+
+      for (var d = 0; d < 4; d++) {
+        var nx = hx + dirs[d].x;
+        var ny = hy + dirs[d].y;
+        if (nx < 0 || ny < 0 || nx >= COLS || ny >= ROWS) continue;
+        var dd = dist[ny * COLS + nx];
+        if (dd < 0) continue;
+        if (dd < bestD) { bestD = dd; candidates = [{ x: nx, y: ny }]; }
+        else if (dd === bestD) candidates.push({ x: nx, y: ny });
+      }
+
+      var next = null;
+      if (candidates.length) {
+        next = candidates[Math.floor(Math.random() * candidates.length)];
+      } else {
+        var safe = safeMoves();
+        if (safe.length) next = safe[Math.floor(Math.random() * safe.length)];
+      }
+
+      if (!next) { resetSnake(); return; }
+
+      var willEat = (next.x === apple.x && next.y === apple.y);
+
+      snake.unshift({ x: next.x, y: next.y });
+      if (!willEat) {
+        snake.pop();
+      } else {
+        hunger = 0;
+        apple = spawnApple();
+        if (snake.length > MAX_LEN) {
+          snake = snake.slice(0, BASE_LEN);
+        }
+      }
+    }
+
+    function roundRect(x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y,     x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x,     y + h, r);
+      ctx.arcTo(x,     y + h, x,     y,     r);
+      ctx.arcTo(x,     y,     x + w, y,     r);
+      ctx.closePath();
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+
+      for (var i = snake.length - 1; i >= 0; i--) {
+        var s = snake[i];
+        var t = 1 - i / Math.max(1, snake.length);
+        var size = CELL * (0.42 + 0.32 * t);
+        var off  = (CELL - size) / 2;
+        var px = s.x * CELL + off;
+        var py = s.y * CELL + off;
+
+        var hue   = 270 - 20 * t;
+        var light = 48 + 22 * t;
+        var alpha = 0.14 + 0.42 * t;
+
+        ctx.fillStyle = 'hsla(' + hue + ', 72%, ' + light + '%, ' + alpha + ')';
+        roundRect(px, py, size, size, size * 0.35);
+        ctx.fill();
+      }
+
+      if (apple) {
+        var cx = apple.x * CELL + CELL / 2;
+        var cy = apple.y * CELL + CELL / 2;
+        var r  = CELL * 0.2;
+
+        var grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, r * 5);
+        grd.addColorStop(0, 'rgba(255, 203, 107, 0.55)');
+        grd.addColorStop(1, 'rgba(255, 203, 107, 0)');
+        ctx.fillStyle = grd;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r * 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = 'rgba(255, 203, 107, 0.95)';
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    var lastStep = 0;
+    function loop(now) {
+      if (!reduced) {
+        if (now - lastStep >= STEP_MS) {
+          lastStep = now;
+          step();
+        }
+        draw();
+      }
+      requestAnimationFrame(loop);
+    }
+
+    var resizeTimer = null;
+    window.addEventListener('resize', function () {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(resize, 150);
+    });
+
+    resize();
+    lastStep = performance.now();
+    requestAnimationFrame(loop);
+  })();
+
 })();
 </script>
 
