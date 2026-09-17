@@ -342,331 +342,371 @@
 </head>
 <body>
 
-<header class="hero">
-  <div class="dice">🎲</div>
-  <div class="badge">Шпаргалка игрока · D&amp;D 5e</div>
-  <h1>Всё, что нужно знать<br>перед первой игрой</h1>
-  <p class="lead">
-    Подборка ответов и материалов, собранных специально для новичка. Классы, расы,
-    мультикласс, обучающие видео и где всё это будет происходить вживую.
-  </p>
-</header>
+<!-- ============================================================
+     РЕДАКТИРУЕМЫЕ ДАННЫЕ
+     Меняй текст / ссылки / иконки здесь — страница соберётся сама.
+     ============================================================ -->
+<script id="page-data" type="application/json">
+{
+  "meta": {
+    "lang": "ru",
+    "title": "D&D — Шпаргалка для новичка"
+  },
 
-<main class="container">
+  "hero": {
+    "dice": "🎲",
+    "badge": "Шпаргалка игрока · D&D 5e",
+    "title": ["Всё, что нужно знать", "перед первой игрой"],
+    "lead": "Подборка ответов и материалов, собранных специально для новичка. Классы, расы, мультикласс, обучающие видео и где всё это будет происходить вживую."
+  },
 
-  <!-- ======================= START ======================= -->
-  <div class="section-title">С чего начать</div>
+  "sections": [
+    {
+      "title": "С чего начать",
+      "items": [
+        {
+          "type": "q",
+          "icon": "🎯",
+          "title": "Какой класс брать на первую игру?",
+          "meta": "Ответ из чата · 00:50",
+          "blocks": [
+            { "type": "p", "html": "Чтобы не душниться правилами с самого старта — <strong>бери не магические классы</strong>." },
+            { "type": "p", "html": "Оптимальный вариант для новичка:" },
+            {
+              "type": "links",
+              "items": [
+                { "kind": "youtube", "icon": "▶", "label": "Каким классом играть в ДнД? | Гайд на каждый класс", "href": "https://youtu.be/G8ULehlYznw" }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "info",
+          "marginTop": 16,
+          "icon": "🐉",
+          "title": "Похоже ли это на Dragon Age?",
+          "meta": "Ответ из чата · 00:30",
+          "blocks": [
+            { "type": "p", "html": "Да, есть общие черты. Если играл в <em>Dragon Age 2</em> — концепция похожа: определённый класс максит свои параметры, а раса даёт свои плюшки." }
+          ]
+        }
+      ]
+    },
 
-  <article class="tip q">
-    <div class="tip-head">
-      <div class="icon">🎯</div>
-      <div>
-        <h3>Какой класс брать на первую игру?</h3>
-        <div class="meta">Ответ из чата · 00:50</div>
-      </div>
-    </div>
-    <p>Чтобы не душниться правилами с самого старта — <strong>бери не магические классы</strong>.</p>
-    <p>Оптимальный вариант для новичка:</p>
-    <div class="links">
-      <a class="link-pill youtube" href="https://youtu.be/G8ULehlYznw" target="_blank" rel="noopener">
-        <span class="lp-icon">▶</span> Каким классом играть в ДнД? | Гайд на каждый класс
-      </a>
-    </div>
-  </article>
+    {
+      "title": "Расы и происхождения",
+      "items": [
+        {
+          "icon": "🧝",
+          "title": "Где смотреть необычные расы?",
+          "meta": "Ответ из чата · 00:57",
+          "blocks": [
+            { "type": "p", "html": "Полный каталог рас и происхождений по D&amp;D 5 на русском — на сайте <code>dnd.su</code>." },
+            {
+              "type": "links",
+              "items": [
+                { "kind": "site", "icon": "🌐", "label": "dnd.su/race — Расы и происхождения D&D 5", "href": "https://dnd.su/race/" }
+              ]
+            },
+            { "type": "callout", "variant": "note", "html": "⚠️ <strong>Важно:</strong> происхождение <u>не равно</u> расе — это разные вещи в правилах." }
+          ]
+        }
+      ]
+    },
 
-  <article class="tip info" style="margin-top:16px;">
-    <div class="tip-head">
-      <div class="icon">🐉</div>
-      <div>
-        <h3>Похоже ли это на Dragon Age?</h3>
-        <div class="meta">Ответ из чата · 00:30</div>
-      </div>
-    </div>
-    <p>
-      Да, есть общие черты. Если играл в <em>Dragon Age 2</em> — концепция похожа:
-      определённый класс максит свои параметры, а раса даёт свои плюшки.
-    </p>
-  </article>
+    {
+      "title": "Мультикласс и нестандартные персонажи",
+      "grid": true,
+      "items": [
+        {
+          "type": "q",
+          "icon": "⚔️",
+          "title": "Можно ли смешанный класс?",
+          "meta": "Ответ из чата · 00:57",
+          "blocks": [
+            { "type": "p", "html": "Смешанный класс — это <strong>мультикласс</strong>. У него свои правила и свои нюансы, поэтому для первой игры лучше не усложнять." },
+            { "type": "answer", "html": "Классы <em>могут</em> быть смешанными <strong>от подкласса</strong> — это более простой путь." }
+          ]
+        },
+        {
+          "icon": "🦄",
+          "title": "Можно ли необычную расу?",
+          "meta": "Ответ из чата · 00:57",
+          "blocks": [
+            { "type": "p", "html": "Да, необычную расу можно — смотри каталог по ссылке выше." },
+            { "type": "callout", "variant": "ok", "html": "✅ Но <strong>четыре конкретных «фигнюшки»</strong> лучше не брать — они не подойдут для старта." }
+          ]
+        }
+      ]
+    },
 
-  <!-- ======================= RACES ======================= -->
-  <div class="section-title">Расы и происхождения</div>
+    {
+      "title": "Создание персонажа — характеристики",
+      "items": [
+        {
+          "type": "q",
+          "icon": "🎲",
+          "title": "Какие характеристики и сколько даётся в начале?",
+          "meta": "Вопрос из чата ВК · 13:57",
+          "blocks": [
+            { "type": "quote", "html": "Какие харки и сколько в начале дается", "author": "Маленький танк" },
+            { "type": "p", "style": "margin-top:14px;", "html": "Это <strong>база</strong> — чтобы никто случайно не собрал себе имбалансного персонажа и не сломал игру на первой же сессии." },
+            { "type": "answer", "html": "<strong>Как решили(решил) в чате:</strong> бросаем кубик и пусть всё решит <code>к20</code>. Очки характеристик получаем <strong>заранее</strong>, а не на самой игре — чтобы не сидеть с калькулятором, пока остальные уже пьют в таверне." },
+            { "type": "callout", "variant": "note", "html": "💡 Совет: пробрасывай характеристики <u>до</u> встречи. На игре это экономит минимум полчаса и пару нервных клеток мастера." }
+          ]
+        },
+        {
+          "type": "warn",
+          "marginTop": 16,
+          "icon": "🧙",
+          "title": "Патти из чародеев — это «интересно» и не плохо, но надо заранее предупредить мастера",
+          "meta": "Мем из чата · 13:53",
+          "blocks": [
+            { "type": "p", "html": "Если очень хочется собрать <strong>пачку чародеев</strong> — это законно, но есть нюанс." },
+            { "type": "quote", "html": "Созадим пачку чародеев и умрём на первом же боссе, потому что у всех лоу хп", "author": "Мелкий танк" },
+            { "type": "quote", "html": "Ну скорее всего не умрём (в начале)", "author": "Разраб (oneslaves)" },
+            { "type": "callout", "variant": "danger", "html": "⚠️ <strong>Главное правило:</strong> предупреди мастера заранее. Пачка стеклянных пушек — это весело, но мастер должен знать, к чему готовиться." }
+          ]
+        }
+      ]
+    },
 
-  <article class="tip">
-    <div class="tip-head">
-      <div class="icon">🧝</div>
-      <div>
-        <h3>Где смотреть необычные расы?</h3>
-        <div class="meta">Ответ из чата · 00:57</div>
-      </div>
-    </div>
-    <p>Полный каталог рас и происхождений по D&amp;D 5 на русском — на сайте <code>dnd.su</code>.</p>
-    <div class="links">
-      <a class="link-pill site" href="https://dnd.su/race/" target="_blank" rel="noopener">
-        <span class="lp-icon">🌐</span> dnd.su/race — Расы и происхождения D&amp;D 5
-      </a>
-    </div>
-    <div class="callout note">
-      ⚠️ <strong>Важно:</strong> происхождение <u>не равно</u> расе — это разные вещи в правилах.
-    </div>
-  </article>
+    {
+      "title": "Обучающие материалы",
+      "items": [
+        {
+          "icon": "📚",
+          "title": "Универсальный источник — канал Sneaky Dice",
+          "meta": "Ответ из чата · 00:59–01:02",
+          "blocks": [
+            { "type": "p", "html": "Один канал, у которого есть тематические видео практически про всё в D&amp;D. Просто вбиваешь в поиск:" },
+            {
+              "type": "ul",
+              "items": [
+                "<code>сники дайс как играть</code>",
+                "<code>сникидайс расы / классы</code>",
+                "<code>сники дайс для новичка</code>"
+              ]
+            },
+            {
+              "type": "links",
+              "items": [
+                { "kind": "youtube", "icon": "▶", "label": "youtube.com/@sneakydice", "href": "https://youtube.com/@sneakydice" }
+              ]
+            },
+            { "type": "callout", "variant": "danger", "html": "⚠️ Последние видео на канале уже выходят за рамки D&amp;D — там тесты реальных доспехов и реклама собственных курсов. Не пугайся, смотри по темам." }
+          ]
+        },
+        {
+          "type": "info",
+          "marginTop": 16,
+          "icon": "🎬",
+          "title": "Примеры отыгрыша — как это выглядит в живую",
+          "meta": "Ответ из чата · 00:48",
+          "blocks": [
+            { "type": "p", "html": "Если есть час-два времени — вот эти ребята прикольно отыгрывают:" },
+            {
+              "type": "links",
+              "items": [
+                { "kind": "youtube", "icon": "▶", "label": "Плейлист с примерами игры", "href": "https://youtube.com/playlist?list=PLORyfNSwiwCLast6Udmk2imovCzV98VCX" },
+                { "kind": "youtube", "icon": "▶", "label": "Игра ДнД — «братишки, дипинс»", "href": "https://youtu.be/ifYj-3xidVQ" }
+              ]
+            },
+            { "type": "callout", "variant": "note", "html": "💡 Если задушнишься от первого примера — попробуй второй, он проще для восприятия." }
+          ]
+        },
+        {
+          "type": "warn",
+          "marginTop": 16,
+          "icon": "🚫",
+          "title": "❓❔💔 Кого не смотреть",
+          "meta": "Ответ из чата · 01:02",
+          "blocks": [
+            { "type": "p", "html": "Канал <strong>«Мастер Ансара»</strong> — на вкус Разраба, советы там <em>недейственные</em>. Лучше не надо для вдохновения смотреть." }
+          ]
+        }
+      ]
+    },
 
-  <!-- ======================= MULTICLASS ======================= -->
-  <div class="section-title">Мультикласс и нестандартные персонажи</div>
+    {
+      "title": "Формат и место игры",
+      "items": [
+        {
+          "type": "ok",
+          "icon": "📍",
+          "title": "Играем вживую (IRL)",
+          "meta": "Ответ из чата · 00:53–00:54",
+          "blocks": [
+            { "type": "p", "html": "Да, играем в живую. Место встречи:" },
+            { "type": "answer", "html": "<strong>Омск</strong>, микрорайон <em>Городок Нефтяников</em>,<br>улица <strong>50 лет Профсоюзов, 126</strong>" }
+          ]
+        },
+        {
+          "type": "q",
+          "marginTop": 16,
+          "icon": "📝",
+          "title": "Формочки для заполнения персонажа",
+          "meta": "Ответ из чата · 01:04–01:08",
+          "blocks": [
+            { "type": "p", "html": "Яша перекидывал шаблоны для заполнения. Если не помнишь — можно попросить прислать заново. В чате также есть примеры заполненных листов от Яши и Кирилла." },
+            { "type": "callout", "variant": "note", "html": "💡 Мастер игры — <strong>Алиса</strong>. Если у неё будут вопросы по твоему персонажу, она задаст их отдельно." }
+          ]
+        }
+      ]
+    },
 
-  <div class="grid-2">
-    <article class="tip q">
-      <div class="tip-head">
-        <div class="icon">⚔️</div>
-        <div>
-          <h3>Можно ли смешанный класс?</h3>
-          <div class="meta">Ответ из чата · 00:57</div>
-        </div>
-      </div>
-      <p>
-        Смешанный класс — это <strong>мультикласс</strong>. У него свои правила и свои нюансы,
-        поэтому для первой игры лучше не усложнять.
-      </p>
-      <div class="answer">
-        Классы <em>могут</em> быть смешанными <strong>от подкласса</strong> — это более простой путь.
-      </div>
-    </article>
+    {
+      "title": "Чек-лист перед первой игрой",
+      "items": [
+        {
+          "icon": "✨",
+          "title": "Собран из обсуждения · чтобы ничего не забыть",
+          "blocks": [
+            {
+              "type": "ul",
+              "className": "checklist",
+              "items": [
+                "Прочитал(а) гайд по классам и выбрал(а) лёгкий / средний класс",
+                "Посмотрел(а) каталог рас на <code>dnd.su</code>",
+                "Не беру мультикласс на первую игру",
+                "Пробросил(а) характеристики <strong>заранее</strong> (к20 решает)",
+                "Предупредил(а) мастера, если собираюсь играть за что-то нестандартное",
+                "Посмотрел(а) пару примеров отыгрыша для настроения",
+                "Заполнил(а) формочку персонажа и отдал(а) мастеру",
+                "Записал(а) адрес: <em>Омск, 50 лет Профсоюзов, 126</em>",
+                "Придумал(а), как познакомиться с другими персонажами например в таверне 🍺"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
 
-    <article class="tip">
-      <div class="tip-head">
-        <div class="icon">🦄</div>
-        <div>
-          <h3>Можно ли необычную расу?</h3>
-          <div class="meta">Ответ из чата · 00:57</div>
-        </div>
-      </div>
-      <p>Да, необычную расу можно — смотри каталог по ссылке выше.</p>
-      <div class="callout ok">
-        ✅ Но <strong>четыре конкретных «фигнюшки»</strong> лучше не брать — они не подойдут для старта.
-      </div>
-    </article>
-  </div>
+  "footer": "Собрано из переписки · <strong>16 сентября 2026</strong><br>Удачи на первой игре, бросай кубы смело 🎲"
+}
+</script>
 
+<!-- ============================================================
+     РЕНДЕРЕР — превращает JSON выше в готовую страницу.
+     Трогать не обязательно.
+     ============================================================ -->
+<script>
+(function () {
+  var data = JSON.parse(document.getElementById('page-data').textContent);
 
-    <!-- ==================== CHARACTER CREATION (NEW) ==================== -->
-  <div class="section-title">Создание персонажа — характеристики</div>
+  /* Маленький помощник для создания элементов */
+  function el(tag, cls, html) {
+    var node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (html != null) node.innerHTML = html;
+    return node;
+  }
 
-  <article class="tip q">
-    <div class="tip-head">
-      <div class="icon">🎲</div>
-      <div>
-        <h3>Какие характеристики и сколько даётся в начале?</h3>
-        <div class="meta">Вопрос из чата ВК · 13:57</div>
-      </div>
-    </div>
+  /* -------- ссылки-таблетки -------- */
+  function renderLinks(items) {
+    var wrap = el('div', 'links');
+    items.forEach(function (l) {
+      var a = el('a', 'link-pill ' + l.kind,
+        '<span class="lp-icon">' + l.icon + '</span> ' + l.label);
+      a.href = l.href;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      wrap.appendChild(a);
+    });
+    return wrap;
+  }
 
-    <blockquote class="quote">
-      Какие харки и сколько в начале дается
-      <span class="q-author">— Маленький танк</span>
-    </blockquote>
+  /* -------- блоки внутри карточки -------- */
+  function renderBlock(b) {
+    if (!b || !b.type) return null;
 
-    <p style="margin-top:14px;">
-      Это <strong>база</strong> — чтобы никто случайно не собрал себе имбалансного персонажа
-      и не сломал игру на первой же сессии.
-    </p>
+    if (b.type === 'p') {
+      var p = el('p', null, b.html);
+      if (b.style) p.setAttribute('style', b.style);
+      return p;
+    }
 
-    <div class="answer">
-      <strong>Как решили(решил) в чате:</strong> бросаем кубик и пусть всё решит <code>к20</code>.
-      Очки характеристик получаем <strong>заранее</strong>, а не на самой игре — чтобы
-      не сидеть с калькулятором, пока остальные уже пьют в таверне.
-    </div>
+    if (b.type === 'links') return renderLinks(b.items);
 
-    <div class="callout note">
-      💡 Совет: пробрасывай характеристики <u>до</u> встречи. На игре это экономит
-      минимум полчаса и пару нервных клеток мастера.
-    </div>
-  </article>
+    if (b.type === 'callout') {
+      var variant = b.variant || 'danger';
+      var cls = (variant === 'danger') ? 'callout' : 'callout ' + variant;
+      return el('div', cls, b.html);
+    }
 
+    if (b.type === 'answer') return el('div', 'answer', b.html);
 
-  <article class="tip warn" style="margin-top:16px;">
-    <div class="tip-head">
-      <div class="icon">🧙</div>
-      <div>
-        <h3>Патти из чародеев — это «интересно» и не плохо, но надо заранее предупредить мастера</h3>
-        <div class="meta">Мем из чата · 13:53</div>
-      </div>
-    </div>
+    if (b.type === 'quote') {
+      return el('blockquote', 'quote',
+        b.html + ' <span class="q-author">— ' + b.author + '</span>');
+    }
 
-    <p>
-      Если очень хочется собрать <strong>пачку чародеев</strong> — это законно,
-      но есть нюанс.
-    </p>
+    if (b.type === 'ul') {
+      var ul = el('ul', b.className || null);
+      b.items.forEach(function (li) { ul.appendChild(el('li', null, li)); });
+      return ul;
+    }
 
-    <blockquote class="quote">
-      Созадим пачку чародеев и умрём на первом же боссе, потому что у всех лоу хп
-      <span class="q-author">— Мелкий танк</span>
-    </blockquote>
+    return null;
+  }
 
-    <blockquote class="quote">
-      Ну скорее всего не умрём (в начале)
-      <span class="q-author">— Разраб (oneslaves)</span>
-    </blockquote>
+  /* -------- одна карточка-подсказка -------- */
+  function renderTip(item) {
+    var cls = 'tip';
+    if (item.type) cls += ' ' + item.type;
 
-    <div class="callout">
-      ⚠️ <strong>Главное правило:</strong> предупреди мастера заранее. Пачка стеклянных пушек —
-      это весело, но мастер должен знать, к чему готовиться.
-    </div>
-  </article>
+    var tip = el('article', cls);
+    if (item.marginTop) tip.style.marginTop = item.marginTop + 'px';
 
-  
-  <!-- ======================= LEARNING MATERIALS ======================= -->
-  <div class="section-title">Обучающие материалы</div>
+    var head = el('div', 'tip-head');
+    head.appendChild(el('div', 'icon', item.icon));
 
-  <article class="tip">
-    <div class="tip-head">
-      <div class="icon">📚</div>
-      <div>
-        <h3>Универсальный источник — канал Sneaky Dice</h3>
-        <div class="meta">Ответ из чата · 00:59–01:02</div>
-      </div>
-    </div>
-    <p>
-      Один канал, у которого есть тематические видео практически про всё в D&amp;D.
-      Просто вбиваешь в поиск:
-    </p>
-    <ul>
-      <li><code>сники дайс как играть</code></li>
-      <li><code>сникидайс расы / классы</code></li>
-      <li><code>сники дайс для новичка</code></li>
-    </ul>
-    <div class="links">
-      <a class="link-pill youtube" href="https://youtube.com/@sneakydice" target="_blank" rel="noopener">
-        <span class="lp-icon">▶</span> youtube.com/@sneakydice
-      </a>
-    </div>
-    <div class="callout">
-      ⚠️ Последние видео на канале уже выходят за рамки D&amp;D — там тесты реальных доспехов
-      и реклама собственных курсов. Не пугайся, смотри по темам.
-    </div>
-  </article>
+    var info = el('div');
+    info.appendChild(el('h3', null, item.title));
+    if (item.meta) info.appendChild(el('div', 'meta', item.meta));
+    head.appendChild(info);
+    tip.appendChild(head);
 
-  <article class="tip info" style="margin-top:16px;">
-    <div class="tip-head">
-      <div class="icon">🎬</div>
-      <div>
-        <h3>Примеры отыгрыша — как это выглядит в живую</h3>
-        <div class="meta">Ответ из чата · 00:48</div>
-      </div>
-    </div>
-    <p>Если есть час-два времени — вот эти ребята прикольно отыгрывают:</p>
-    <div class="links">
-      <a class="link-pill youtube" href="https://youtube.com/playlist?list=PLORyfNSwiwCLast6Udmk2imovCzV98VCX" target="_blank" rel="noopener">
-        <span class="lp-icon">▶</span> Плейлист с примерами игры
-      </a>
-      <a class="link-pill youtube" href="https://youtu.be/ifYj-3xidVQ" target="_blank" rel="noopener">
-        <span class="lp-icon">▶</span> Игра ДнД — «братишки, дипинс»
-      </a>
-    </div>
-    <div class="callout note">
-      💡 Если задушнишься от первого примера — попробуй второй, он проще для восприятия.
-    </div>
-  </article>
+    (item.blocks || []).forEach(function (b) {
+      var node = renderBlock(b);
+      if (node) tip.appendChild(node);
+    });
 
-  <article class="tip warn" style="margin-top:16px;">
-    <div class="tip-head">
-      <div class="icon">🚫</div>
-      <div>
-        <h3>❓❔💔 Кого не смотреть</h3>
-        <div class="meta">Ответ из чата · 01:02</div>
-      </div>
-    </div>
-    <p>
-      Канал <strong>«Мастер Ансара»</strong> — на вкус Разраба, советы там
-      <em>недейственные</em>. Лучше не надо для вдохновения смотреть.
-    </p>
-  </article>
+    return tip;
+  }
 
-  <!-- ======================= FORMAT ======================= -->
-  <div class="section-title">Формат и место игры</div>
+  /* -------- HERO -------- */
+  var hero = el('header', 'hero');
+  hero.appendChild(el('div', 'dice', data.hero.dice));
+  hero.appendChild(el('div', 'badge', data.hero.badge));
+  hero.appendChild(el('h1', null, data.hero.title.join('<br>')));
+  hero.appendChild(el('p', 'lead', data.hero.lead));
+  document.body.appendChild(hero);
 
-  <article class="tip ok">
-    <div class="tip-head">
-      <div class="icon">📍</div>
-      <div>
-        <h3>Играем вживую (IRL)</h3>
-        <div class="meta">Ответ из чата · 00:53–00:54</div>
-      </div>
-    </div>
-    <p>Да, играем в живую. Место встречи:</p>
-    <div class="answer">
-      <strong>Омск</strong>, микрорайон <em>Городок Нефтяников</em>,<br>
-      улица <strong>50 лет Профсоюзов, 126</strong>
-    </div>
-  </article>
+  /* -------- MAIN -------- */
+  var main = el('main', 'container');
+  data.sections.forEach(function (section) {
+    main.appendChild(el('div', 'section-title', section.title));
 
-  <article class="tip q" style="margin-top:16px;">
-    <div class="tip-head">
-      <div class="icon">📝</div>
-      <div>
-        <h3>Формочки для заполнения персонажа</h3>
-        <div class="meta">Ответ из чата · 01:04–01:08</div>
-      </div>
-    </div>
-    <p>
-      Яша перекидывал шаблоны для заполнения. Если не помнишь — можно попросить прислать заново.
-      В чате также есть примеры заполненных листов от Яши и Кирилла.
-    </p>
-    <div class="callout note">
-      💡 Мастер игры — <strong>Алиса</strong>. Если у неё будут вопросы по твоему персонажу,
-      она задаст их отдельно.
-    </div>
-  </article>
+    if (section.grid) {
+      var grid = el('div', 'grid-2');
+      section.items.forEach(function (item) {
+        grid.appendChild(renderTip(item));
+      });
+      main.appendChild(grid);
+    } else {
+      section.items.forEach(function (item) {
+        main.appendChild(renderTip(item));
+      });
+    }
+  });
+  document.body.appendChild(main);
 
-  <!-- ======================= BONUS ======================= -->
-  <!-- <div class="section-title">Полезные мелочи</div>
-
-  <article class="tip">
-    <div class="tip-head">
-      <div class="icon">✨</div>
-      <div>
-        <h3>Чек-лист перед первой игрой</h3>
-        <div class="meta">Собран из обсуждения</div>
-      </div>
-    </div>
-    <ul>
-      <li>Прочитал(а) гайд по классам и выбрал(а) лёгкий / средний класс</li>
-      <li>Посмотрел(а) каталог рас на <code>dnd.su</code></li>
-      <li>Не беру мультикласс на первую игру</li>
-      <li>Посмотрел(а) пару примеров отыгрыша для настроения</li>
-      <li>Заполнил(а) формочку персонажа и отдал(а) мастеру</li>
-      <li>Записал(а) адрес: <em>Омск, 50 лет Профсоюзов, 126</em></li>
-    </ul>
-  </article> -->
-
-
-    <!-- ==================== CHECKLIST ==================== -->
-  <div class="section-title">Чек-лист перед первой игрой</div>
-
-  <article class="tip">
-    <div class="tip-head">
-      <div class="icon">✨</div>
-      <div>
-        <h3>Собран из обсуждения · чтобы ничего не забыть</h3>
-      </div>
-    </div>
-    <ul class="checklist">
-      <li>Прочитал(а) гайд по классам и выбрал(а) лёгкий / средний класс</li>
-      <li>Посмотрел(а) каталог рас на <code>dnd.su</code></li>
-      <li>Не беру мультикласс на первую игру</li>
-      <li>Пробросил(а) характеристики <strong>заранее</strong> (к20 решает)</li>
-      <li>Предупредил(а) мастера, если собираюсь играть за что-то нестандартное</li>
-      <li>Посмотрел(а) пару примеров отыгрыша для настроения</li>
-      <li>Заполнил(а) формочку персонажа и отдал(а) мастеру</li>
-      <li>Записал(а) адрес: <em>Омск, 50 лет Профсоюзов, 126</em></li>
-      <li>Придумал(а), как познакомиться с другими персонажами например в таверне 🍺</li>
-    </ul>
-  </article>
-
-</main>
-
-<footer>
-  Собрано из переписки · <strong>16 сентября 2026</strong><br>
-  Удачи на первой игре, бросай кубы смело 🎲
-</footer>
+  /* -------- FOOTER -------- */
+  document.body.appendChild(el('footer', null, data.footer));
+})();
+</script>
 
 </body>
 </html>
