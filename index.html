@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>D&D — Шпаргалка для новичка</title>
+<style>
+  :root {
+    --bg-0: #0e0b1a;
+    --bg-1: #16122a;
+    --bg-2: #1e1838;
+    --card: #211a3d;
+    --card-hi: #2a2150;
+    --line: #322a5c;
+    --text: #e9e6f5;
+    --muted: #a49fc4;
+    --dim: #6f6a94;
+    --accent: #b892ff;
+    --accent-2: #ffcb6b;
+    --accent-3: #66e0c0;
+    --danger: #ff7a90;
+    --success: #7ee0a0;
+    --shadow: 0 20px 50px rgba(0,0,0,.45);
+    --radius: 18px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: radial-gradient(1200px 700px at 15% -10%, #2b1f5c 0%, transparent 60%),
+                radial-gradient(1000px 600px at 110% 10%, #4a1f4a 0%, transparent 55%),
+                var(--bg-0);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { color: var(--accent-2); text-decoration: underline; }
+
+  /* ---------- HEADER ---------- */
+  .hero {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 72px 24px 40px;
+    text-align: center;
+  }
+
+  .hero .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: rgba(184, 146, 255, 0.12);
+    border: 1px solid rgba(184, 146, 255, 0.35);
+    border-radius: 999px;
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 22px;
+  }
+
+  .hero h1 {
+    font-size: clamp(32px, 5vw, 52px);
+    line-height: 1.15;
+    margin: 0 0 18px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #ffffff 0%, #d6c8ff 45%, #ffcb6b 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .hero p.lead {
+    max-width: 640px;
+    margin: 0 auto;
+    color: var(--muted);
+    font-size: 17px;
+  }
+
+  .hero .dice {
+    display: inline-block;
+    font-size: 44px;
+    margin-bottom: 8px;
+    filter: drop-shadow(0 6px 18px rgba(184,146,255,.5));
+    animation: spin 9s linear infinite;
+  }
+
+  @keyframes spin {
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  /* ---------- LAYOUT ---------- */
+  .container {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin: 48px 0 18px;
+  }
+
+  .section-title::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--line), transparent);
+  }
+
+  /* ---------- TIP CARD ---------- */
+  .tip {
+    background: linear-gradient(180deg, var(--card) 0%, var(--bg-2) 100%);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 26px 28px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+    transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+  }
+
+  .tip:hover {
+    transform: translateY(-2px);
+    border-color: rgba(184, 146, 255, 0.5);
+    box-shadow: var(--shadow);
+  }
+
+  .tip::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 3px;
+    background: linear-gradient(180deg, var(--accent), transparent);
+    opacity: 0.7;
+  }
+
+  .tip.q::before { background: linear-gradient(180deg, var(--accent-2), transparent); }
+  .tip.warn::before { background: linear-gradient(180deg, var(--danger), transparent); }
+  .tip.ok::before { background: linear-gradient(180deg, var(--success), transparent); }
+  .tip.info::before { background: linear-gradient(180deg, var(--accent-3), transparent); }
+
+  .tip .tip-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+
+  .tip .icon {
+    flex: 0 0 auto;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    font-size: 22px;
+    background: rgba(184, 146, 255, 0.12);
+    border: 1px solid rgba(184, 146, 255, 0.25);
+  }
+
+  .tip.q .icon      { background: rgba(255, 203, 107, 0.12); border-color: rgba(255,203,107,.3); }
+  .tip.warn .icon   { background: rgba(255, 122, 144, 0.12); border-color: rgba(255,122,144,.3); }
+  .tip.ok .icon     { background: rgba(126, 224, 160, 0.12); border-color: rgba(126,224,160,.3); }
+  .tip.info .icon   { background: rgba(102, 224, 192, 0.12); border-color: rgba(102,224,192,.3); }
+
+  .tip h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+    line-height: 1.35;
+  }
+
+  .tip .meta {
+    font-size: 12px;
+    color: var(--dim);
+    margin-top: 3px;
+    letter-spacing: 0.04em;
+  }
+
+  .tip p {
+    margin: 0 0 10px;
+    color: var(--text);
+    opacity: 0.94;
+  }
+
+  .tip p:last-child { margin-bottom: 0; }
+
+  .tip ul {
+    margin: 6px 0 10px;
+    padding-left: 0;
+    list-style: none;
+  }
+
+  .tip ul li {
+    position: relative;
+    padding-left: 22px;
+    margin-bottom: 6px;
+    color: var(--text);
+    opacity: 0.94;
+  }
+
+  .tip ul li::before {
+    content: "◆";
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: var(--accent);
+    font-size: 10px;
+    line-height: 24px;
+  }
+
+  .tip code {
+    background: rgba(255,255,255,0.06);
+    padding: 2px 7px;
+    border-radius: 6px;
+    font-size: 14px;
+    color: var(--accent-2);
+    font-family: 'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
+  }
+
+  /* ---------- LINK PILLS ---------- */
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .link-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 14px;
+    background: rgba(184, 146, 255, 0.08);
+    border: 1px solid rgba(184, 146, 255, 0.28);
+    border-radius: 10px;
+    font-size: 14px;
+    color: var(--text);
+    transition: all .15s ease;
+    word-break: break-all;
+  }
+
+  .link-pill:hover {
+    background: rgba(184, 146, 255, 0.18);
+    border-color: var(--accent);
+    color: #ffffff;
+    text-decoration: none;
+    transform: translateY(-1px);
+  }
+
+  .link-pill .lp-icon {
+    font-size: 16px;
+    flex: 0 0 auto;
+  }
+
+  .link-pill.youtube .lp-icon { color: #ff5555; }
+  .link-pill.site .lp-icon    { color: var(--accent-3); }
+
+  /* ---------- CALLOUT ---------- */
+  .callout {
+    margin-top: 12px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 14.5px;
+    background: rgba(255, 122, 144, 0.08);
+    border-left: 3px solid var(--danger);
+    color: #ffd6dd;
+  }
+
+  .callout.ok {
+    background: rgba(126, 224, 160, 0.08);
+    border-left-color: var(--success);
+    color: #d7f7e1;
+  }
+
+  .callout.note {
+    background: rgba(255, 203, 107, 0.08);
+    border-left-color: var(--accent-2);
+    color: #ffe9c0;
+  }
+
+  /* ---------- QUOTE-ANSWER ---------- */
+  .answer {
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 12px;
+    border: 1px dashed var(--line);
+    font-size: 15px;
+    color: var(--text);
+  }
+
+  .answer + .answer { margin-top: 8px; }
+
+  /* ---------- GRID (два столбца на широких экранах) ---------- */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  @media (min-width: 800px) {
+    .grid-2 { grid-template-columns: 1fr 1fr; }
+    .grid-2 .tip { margin-bottom: 0; }
+  }
+
+  /* ---------- FOOTER ---------- */
+  footer {
+    text-align: center;
+    padding: 40px 24px 60px;
+    color: var(--dim);
+    font-size: 14px;
+    border-top: 1px solid var(--line);
+    margin-top: 40px;
+  }
+  footer strong { color: var(--muted); }
+
+  /* ---------- SCROLLBAR ---------- */
+  ::-webkit-scrollbar { width: 10px; }
+  ::-webkit-scrollbar-track { background: var(--bg-0); }
+  ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 5px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="dice">🎲</div>
+  <div class="badge">Шпаргалка игрока · D&amp;D 5e</div>
+  <h1>Всё, что нужно знать<br>перед первой игрой</h1>
+  <p class="lead">
+    Подборка ответов и материалов, собранных специально для новичка. Классы, расы,
+    мультикласс, обучающие видео и где всё это будет происходить вживую.
+  </p>
+</header>
+
+<main class="container">
+
+  <!-- ======================= START ======================= -->
+  <div class="section-title">С чего начать</div>
+
+  <article class="tip q">
+    <div class="tip-head">
+      <div class="icon">🎯</div>
+      <div>
+        <h3>Какой класс брать на первую игру?</h3>
+        <div class="meta">Ответ из чата · 00:50</div>
+      </div>
+    </div>
+    <p>Чтобы не душниться правилами с самого старта — <strong>бери не магические классы</strong>.</p>
+    <p>Оптимальный вариант для новичка:</p>
+    <ul>
+      <li>Лёгкие классы</li>
+      <li>Средние классы</li>
+      <li><strong>Кроме жреца</strong> — с ним придётся повозиться</li>
+    </ul>
+    <div class="links">
+      <a class="link-pill youtube" href="https://youtu.be/G8ULehlYznw" target="_blank" rel="noopener">
+        <span class="lp-icon">▶</span> Каким классом играть в ДнД? | Гайд на каждый класс
+      </a>
+    </div>
+  </article>
+
+  <article class="tip info" style="margin-top:16px;">
+    <div class="tip-head">
+      <div class="icon">🐉</div>
+      <div>
+        <h3>Похоже ли это на Dragon Age?</h3>
+        <div class="meta">Ответ из чата · 00:30</div>
+      </div>
+    </div>
+    <p>
+      Да, есть общие черты. Если играл в <em>Dragon Age 2</em> — концепция похожа:
+      определённый класс максит свои параметры, а раса даёт свои плюшки.
+    </p>
+  </article>
+
+  <!-- ======================= RACES ======================= -->
+  <div class="section-title">Расы и происхождения</div>
+
+  <article class="tip">
+    <div class="tip-head">
+      <div class="icon">🧝</div>
+      <div>
+        <h3>Где смотреть необычные расы?</h3>
+        <div class="meta">Ответ из чата · 00:57</div>
+      </div>
+    </div>
+    <p>Полный каталог рас и происхождений по D&amp;D 5 на русском — на сайте <code>dnd.su</code>.</p>
+    <div class="links">
+      <a class="link-pill site" href="https://dnd.su/race/" target="_blank" rel="noopener">
+        <span class="lp-icon">🌐</span> dnd.su/race — Расы и происхождения D&amp;D 5
+      </a>
+    </div>
+    <div class="callout note">
+      ⚠️ <strong>Важно:</strong> происхождение <u>не равно</u> расе — это разные вещи в правилах.
+    </div>
+  </article>
+
+  <!-- ======================= MULTICLASS ======================= -->
+  <div class="section-title">Мультикласс и нестандартные персонажи</div>
+
+  <div class="grid-2">
+    <article class="tip q">
+      <div class="tip-head">
+        <div class="icon">⚔️</div>
+        <div>
+          <h3>Можно ли смешанный класс?</h3>
+          <div class="meta">Ответ из чата · 00:57</div>
+        </div>
+      </div>
+      <p>
+        Смешанный класс — это <strong>мультикласс</strong>. У него свои правила и свои нюансы,
+        поэтому для первой игры лучше не усложнять.
+      </p>
+      <div class="answer">
+        Классы <em>могут</em> быть смешанными <strong>от подкласса</strong> — это более простой путь.
+      </div>
+    </article>
+
+    <article class="tip">
+      <div class="tip-head">
+        <div class="icon">🦄</div>
+        <div>
+          <h3>Можно ли необычную расу?</h3>
+          <div class="meta">Ответ из чата · 00:57</div>
+        </div>
+      </div>
+      <p>Да, необычную расу можно — смотри каталог по ссылке выше.</p>
+      <div class="callout ok">
+        ✅ Но <strong>четыре конкретных «фигнюшки»</strong> лучше не брать — они не подойдут для старта.
+      </div>
+    </article>
+  </div>
+
+  <!-- ======================= LEARNING MATERIALS ======================= -->
+  <div class="section-title">Обучающие материалы</div>
+
+  <article class="tip">
+    <div class="tip-head">
+      <div class="icon">📚</div>
+      <div>
+        <h3>Универсальный источник — канал Sneaky Dice</h3>
+        <div class="meta">Ответ из чата · 00:59–01:02</div>
+      </div>
+    </div>
+    <p>
+      Один канал, у которого есть тематические видео практически про всё в D&amp;D.
+      Просто вбиваешь в поиск:
+    </p>
+    <ul>
+      <li><code>сники дайс как играть</code></li>
+      <li><code>сникидайс расы / классы</code></li>
+      <li><code>сники дайс для новичка</code></li>
+    </ul>
+    <div class="links">
+      <a class="link-pill youtube" href="https://youtube.com/@sneakydice" target="_blank" rel="noopener">
+        <span class="lp-icon">▶</span> youtube.com/@sneakydice
+      </a>
+    </div>
+    <div class="callout">
+      ⚠️ Последние видео на канале уже выходят за рамки D&amp;D — там тесты реальных доспехов
+      и реклама собственных курсов. Не пугайся, смотри по темам.
+    </div>
+  </article>
+
+  <article class="tip info" style="margin-top:16px;">
+    <div class="tip-head">
+      <div class="icon">🎬</div>
+      <div>
+        <h3>Примеры отыгрыша — как это выглядит в живую</h3>
+        <div class="meta">Ответ из чата · 00:48</div>
+      </div>
+    </div>
+    <p>Если есть час-два времени — вот эти ребята прикольно отыгрывают:</p>
+    <div class="links">
+      <a class="link-pill youtube" href="https://youtube.com/playlist?list=PLORyfNSwiwCLast6Udmk2imovCzV98VCX" target="_blank" rel="noopener">
+        <span class="lp-icon">▶</span> Плейлист с примерами игры
+      </a>
+      <a class="link-pill youtube" href="https://youtu.be/ifYj-3xidVQ" target="_blank" rel="noopener">
+        <span class="lp-icon">▶</span> Игра ДнД — «братишки, дипинс»
+      </a>
+    </div>
+    <div class="callout note">
+      💡 Если задушнишься от первого примера — попробуй второй, он проще для восприятия.
+    </div>
+  </article>
+
+  <article class="tip warn" style="margin-top:16px;">
+    <div class="tip-head">
+      <div class="icon">🚫</div>
+      <div>
+        <h3>Кого не смотреть</h3>
+        <div class="meta">Ответ из чата · 01:02</div>
+      </div>
+    </div>
+    <p>
+      Канал <strong>«Мастер Ансара»</strong> — на вкус нашего мастера, советы там
+      <em>недейственные</em>. Лучше не тратить на него время.
+    </p>
+  </article>
+
+  <!-- ======================= FORMAT ======================= -->
+  <div class="section-title">Формат и место игры</div>
+
+  <article class="tip ok">
+    <div class="tip-head">
+      <div class="icon">📍</div>
+      <div>
+        <h3>Играем вживую (IRL)</h3>
+        <div class="meta">Ответ из чата · 00:53–00:54</div>
+      </div>
+    </div>
+    <p>Да, играем в живую. Место встречи:</p>
+    <div class="answer">
+      <strong>Омск</strong>, микрорайон <em>Городок Нефтяников</em>,<br>
+      улица <strong>50 лет Профсоюзов, 126</strong>
+    </div>
+  </article>
+
+  <article class="tip q" style="margin-top:16px;">
+    <div class="tip-head">
+      <div class="icon">📝</div>
+      <div>
+        <h3>Формочки для заполнения персонажа</h3>
+        <div class="meta">Ответ из чата · 01:04–01:08</div>
+      </div>
+    </div>
+    <p>
+      Яша перекидывал шаблоны для заполнения. Если не помнишь — можно попросить прислать заново.
+      В чате также есть примеры заполненных листов от Яши и Кирилла.
+    </p>
+    <div class="callout note">
+      💡 Мастер игры — <strong>Алиса</strong>. Если у неё будут вопросы по твоему персонажу,
+      она задаст их отдельно.
+    </div>
+  </article>
+
+  <!-- ======================= BONUS ======================= -->
+  <div class="section-title">Полезные мелочи</div>
+
+  <article class="tip">
+    <div class="tip-head">
+      <div class="icon">✨</div>
+      <div>
+        <h3>Чек-лист перед первой игрой</h3>
+        <div class="meta">Собран из обсуждения</div>
+      </div>
+    </div>
+    <ul>
+      <li>Прочитал(а) гайд по классам и выбрал(а) лёгкий / средний класс</li>
+      <li>Посмотрел(а) каталог рас на <code>dnd.su</code></li>
+      <li>Не беру мультикласс на первую игру</li>
+      <li>Посмотрел(а) пару примеров отыгрыша для настроения</li>
+      <li>Заполнил(а) формочку персонажа и отдал(а) мастеру</li>
+      <li>Записал(а) адрес: <em>Омск, 50 лет Профсоюзов, 126</em></li>
+    </ul>
+  </article>
+
+</main>
+
+<footer>
+  Собрано из переписки · <strong>16 сентября 2026</strong><br>
+  Удачи на первой игре, бросай кубы смело 🎲
+</footer>
+
+</body>
+</html>
