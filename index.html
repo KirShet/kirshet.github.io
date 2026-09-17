@@ -152,9 +152,9 @@
     opacity: 0.7;
   }
 
-  .tip.q::before { background: linear-gradient(180deg, var(--accent-2), transparent); }
+  .tip.q::before    { background: linear-gradient(180deg, var(--accent-2), transparent); }
   .tip.warn::before { background: linear-gradient(180deg, var(--danger), transparent); }
-  .tip.ok::before { background: linear-gradient(180deg, var(--success), transparent); }
+  .tip.ok::before   { background: linear-gradient(180deg, var(--success), transparent); }
   .tip.info::before { background: linear-gradient(180deg, var(--accent-3), transparent); }
 
   .tip .tip-head {
@@ -176,10 +176,10 @@
     border: 1px solid rgba(184, 146, 255, 0.25);
   }
 
-  .tip.q .icon      { background: rgba(255, 203, 107, 0.12); border-color: rgba(255,203,107,.3); }
-  .tip.warn .icon   { background: rgba(255, 122, 144, 0.12); border-color: rgba(255,122,144,.3); }
-  .tip.ok .icon     { background: rgba(126, 224, 160, 0.12); border-color: rgba(126,224,160,.3); }
-  .tip.info .icon   { background: rgba(102, 224, 192, 0.12); border-color: rgba(102,224,192,.3); }
+  .tip.q .icon    { background: rgba(255, 203, 107, 0.12); border-color: rgba(255,203,107,.3); }
+  .tip.warn .icon { background: rgba(255, 122, 144, 0.12); border-color: rgba(255,122,144,.3); }
+  .tip.ok .icon   { background: rgba(126, 224, 160, 0.12); border-color: rgba(126,224,160,.3); }
+  .tip.info .icon { background: rgba(102, 224, 192, 0.12); border-color: rgba(102,224,192,.3); }
 
   .tip h3 {
     margin: 0;
@@ -229,6 +229,13 @@
     line-height: 24px;
   }
 
+  .tip ul.checklist li::before {
+    content: "✓";
+    color: var(--success);
+    font-size: 12px;
+    font-weight: 700;
+  }
+
   .tip code {
     background: rgba(255,255,255,0.06);
     padding: 2px 7px;
@@ -236,6 +243,26 @@
     font-size: 14px;
     color: var(--accent-2);
     font-family: 'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
+  }
+
+  /* ---------- QUOTES ---------- */
+  .quote {
+    margin: 10px 0;
+    padding: 10px 16px;
+    border-left: 3px solid var(--accent);
+    background: rgba(184, 146, 255, 0.06);
+    border-radius: 0 10px 10px 0;
+    font-style: italic;
+    color: var(--muted);
+    font-size: 15px;
+  }
+
+  .quote .q-author {
+    display: block;
+    margin-top: 6px;
+    font-style: normal;
+    font-size: 13px;
+    color: var(--dim);
   }
 
   /* ---------- LINK PILLS ---------- */
@@ -311,7 +338,7 @@
 
   .answer + .answer { margin-top: 8px; }
 
-  /* ---------- GRID (два столбца на широких экранах) ---------- */
+  /* ---------- GRID ---------- */
   .grid-2 {
     display: grid;
     grid-template-columns: 1fr;
@@ -334,17 +361,154 @@
   footer strong { color: var(--muted); }
 
   /* ---------- SCROLLBAR ---------- */
-  ::-webkit-scrollbar { width: 10px; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
   ::-webkit-scrollbar-track { background: var(--bg-0); }
   ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 5px; }
   ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+  /* ============================================================
+     РЕДАКТОР page-data (плашка снизу)
+     ============================================================ */
+  #editor-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 100;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, var(--accent) 0%, #8b5cf6 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    box-shadow: 0 10px 30px rgba(184, 146, 255, 0.45);
+    transition: transform .15s ease, box-shadow .15s ease, opacity .2s ease;
+  }
+  #editor-toggle:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 36px rgba(184, 146, 255, 0.6);
+  }
+  #editor-toggle:active { transform: translateY(0); }
+
+  body.editor-open #editor-toggle { opacity: 0; pointer-events: none; }
+
+  #editor-panel {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    height: 72vh;
+    background: #0e0b1a;
+    border-top: 1px solid var(--line);
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    transform: translateY(100%);
+    transition: transform .28s cubic-bezier(.2,.7,.2,1);
+    box-shadow: 0 -24px 70px rgba(0,0,0,.65);
+  }
+  #editor-panel.open { transform: translateY(0); }
+
+  .editor-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg-1);
+    flex-wrap: wrap;
+  }
+
+  .editor-header .ed-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .editor-header .ed-title .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent-3);
+    box-shadow: 0 0 10px var(--accent-3);
+  }
+
+  .editor-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .editor-actions button {
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--card);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s ease;
+  }
+  .editor-actions button:hover {
+    border-color: var(--accent);
+    color: #ffffff;
+  }
+  .editor-actions button.primary {
+    background: linear-gradient(135deg, var(--accent) 0%, #8b5cf6 100%);
+    border-color: transparent;
+    color: #ffffff;
+  }
+  .editor-actions button.primary:hover { filter: brightness(1.1); }
+  .editor-actions button.danger:hover { border-color: var(--danger); color: #ffd6dd; }
+
+  #editor-textarea {
+    flex: 1;
+    width: 100%;
+    padding: 16px 20px;
+    background: #0a0814;
+    color: #d6d2f0;
+    border: none;
+    outline: none;
+    font-family: 'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
+    font-size: 13px;
+    line-height: 1.55;
+    resize: none;
+    tab-size: 2;
+    white-space: pre;
+    overflow: auto;
+  }
+
+  #editor-status {
+    padding: 8px 18px;
+    font-size: 13px;
+    border-top: 1px solid var(--line);
+    background: var(--bg-1);
+    color: var(--muted);
+    min-height: 34px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  #editor-status.ok  { color: var(--success); }
+  #editor-status.err { color: var(--danger); }
+
+  @media (max-width: 600px) {
+    #editor-panel { height: 85vh; }
+    #editor-toggle { bottom: 14px; right: 14px; padding: 11px 16px; font-size: 13px; }
+  }
 </style>
 </head>
 <body>
 
+<!-- Сюда рендерится вся страница -->
+<div id="app"></div>
+
 <!-- ============================================================
-     РЕДАКТИРУЕМЫЕ ДАННЫЕ
-     Меняй текст / ссылки / иконки здесь — страница соберётся сама.
+     РЕДАКТИРУЕМЫЕ ДАННЫЕ (page-data)
+     Меняй здесь или через плашку снизу — результат одинаковый.
      ============================================================ -->
 <script id="page-data" type="application/json">
 {
@@ -588,14 +752,45 @@
 </script>
 
 <!-- ============================================================
-     РЕНДЕРЕР — превращает JSON выше в готовую страницу.
-     Трогать не обязательно.
+     ПЛАШКА + ПАНЕЛЬ РЕДАКТОРА
+     ============================================================ -->
+<button id="editor-toggle" type="button">✎ Редактировать данные</button>
+
+<div id="editor-panel" role="dialog" aria-label="Редактор page-data">
+  <div class="editor-header">
+    <div class="ed-title"><span class="dot"></span> page-data · JSON</div>
+    <div class="editor-actions">
+      <button id="editor-reset" class="danger" type="button">↺ Сбросить</button>
+      <button id="editor-apply" class="primary" type="button">✓ Применить</button>
+      <button id="editor-close" type="button">✕ Закрыть</button>
+    </div>
+  </div>
+  <textarea id="editor-textarea" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+  <div id="editor-status">Ctrl+Enter — применить · Tab — отступ 2 пробела</div>
+</div>
+
+<!-- ============================================================
+     РЕНДЕРЕР + ЛОГИКА РЕДАКТОРА
      ============================================================ -->
 <script>
 (function () {
-  var data = JSON.parse(document.getElementById('page-data').textContent);
+  "use strict";
 
-  /* Маленький помощник для создания элементов */
+  var ORIGINAL_RAW = document.getElementById('page-data').textContent;
+  var STORAGE_KEY  = 'dnd-page-data';
+
+  var app       = document.getElementById('app');
+  var toggleBtn = document.getElementById('editor-toggle');
+  var panel     = document.getElementById('editor-panel');
+  var textarea  = document.getElementById('editor-textarea');
+  var statusEl  = document.getElementById('editor-status');
+  var btnApply  = document.getElementById('editor-apply');
+  var btnReset  = document.getElementById('editor-reset');
+  var btnClose  = document.getElementById('editor-close');
+
+  var currentData = null;
+
+  /* ---------- мелкий помощник ---------- */
   function el(tag, cls, html) {
     var node = document.createElement(tag);
     if (cls) node.className = cls;
@@ -603,12 +798,12 @@
     return node;
   }
 
-  /* -------- ссылки-таблетки -------- */
+  /* ---------- ссылки-таблетки ---------- */
   function renderLinks(items) {
     var wrap = el('div', 'links');
     items.forEach(function (l) {
-      var a = el('a', 'link-pill ' + l.kind,
-        '<span class="lp-icon">' + l.icon + '</span> ' + l.label);
+      var a = el('a', 'link-pill ' + (l.kind || ''),
+        '<span class="lp-icon">' + (l.icon || '🔗') + '</span> ' + l.label);
       a.href = l.href;
       a.target = '_blank';
       a.rel = 'noopener';
@@ -617,7 +812,7 @@
     return wrap;
   }
 
-  /* -------- блоки внутри карточки -------- */
+  /* ---------- один блок внутри карточки ---------- */
   function renderBlock(b) {
     if (!b || !b.type) return null;
 
@@ -627,11 +822,11 @@
       return p;
     }
 
-    if (b.type === 'links') return renderLinks(b.items);
+    if (b.type === 'links') return renderLinks(b.items || []);
 
     if (b.type === 'callout') {
-      var variant = b.variant || 'danger';
-      var cls = (variant === 'danger') ? 'callout' : 'callout ' + variant;
+      var v = b.variant || 'danger';
+      var cls = (v === 'danger') ? 'callout' : 'callout ' + v;
       return el('div', cls, b.html);
     }
 
@@ -644,26 +839,24 @@
 
     if (b.type === 'ul') {
       var ul = el('ul', b.className || null);
-      b.items.forEach(function (li) { ul.appendChild(el('li', null, li)); });
+      (b.items || []).forEach(function (li) { ul.appendChild(el('li', null, li)); });
       return ul;
     }
 
     return null;
   }
 
-  /* -------- одна карточка-подсказка -------- */
+  /* ---------- одна карточка ---------- */
   function renderTip(item) {
-    var cls = 'tip';
-    if (item.type) cls += ' ' + item.type;
-
+    var cls = 'tip' + (item.type ? ' ' + item.type : '');
     var tip = el('article', cls);
     if (item.marginTop) tip.style.marginTop = item.marginTop + 'px';
 
     var head = el('div', 'tip-head');
-    head.appendChild(el('div', 'icon', item.icon));
+    if (item.icon) head.appendChild(el('div', 'icon', item.icon));
 
     var info = el('div');
-    info.appendChild(el('h3', null, item.title));
+    info.appendChild(el('h3', null, item.title || ''));
     if (item.meta) info.appendChild(el('div', 'meta', item.meta));
     head.appendChild(info);
     tip.appendChild(head);
@@ -676,35 +869,128 @@
     return tip;
   }
 
-  /* -------- HERO -------- */
-  var hero = el('header', 'hero');
-  hero.appendChild(el('div', 'dice', data.hero.dice));
-  hero.appendChild(el('div', 'badge', data.hero.badge));
-  hero.appendChild(el('h1', null, data.hero.title.join('<br>')));
-  hero.appendChild(el('p', 'lead', data.hero.lead));
-  document.body.appendChild(hero);
+  /* ---------- отрисовка всей страницы ---------- */
+  function render(data) {
+    currentData = data;
+    app.innerHTML = '';
 
-  /* -------- MAIN -------- */
-  var main = el('main', 'container');
-  data.sections.forEach(function (section) {
-    main.appendChild(el('div', 'section-title', section.title));
+    /* hero */
+    var hero = el('header', 'hero');
+    if (data.hero) {
+      if (data.hero.dice)  hero.appendChild(el('div', 'dice', data.hero.dice));
+      if (data.hero.badge) hero.appendChild(el('div', 'badge', data.hero.badge));
+      if (data.hero.title) hero.appendChild(el('h1', null, [].concat(data.hero.title).join('<br>')));
+      if (data.hero.lead)  hero.appendChild(el('p', 'lead', data.hero.lead));
+    }
+    app.appendChild(hero);
 
-    if (section.grid) {
-      var grid = el('div', 'grid-2');
-      section.items.forEach(function (item) {
-        grid.appendChild(renderTip(item));
-      });
-      main.appendChild(grid);
-    } else {
-      section.items.forEach(function (item) {
-        main.appendChild(renderTip(item));
-      });
+    /* main */
+    var main = el('main', 'container');
+    (data.sections || []).forEach(function (section) {
+      main.appendChild(el('div', 'section-title', section.title || ''));
+
+      if (section.grid) {
+        var grid = el('div', 'grid-2');
+        (section.items || []).forEach(function (item) {
+          grid.appendChild(renderTip(item));
+        });
+        main.appendChild(grid);
+      } else {
+        (section.items || []).forEach(function (item) {
+          main.appendChild(renderTip(item));
+        });
+      }
+    });
+    app.appendChild(main);
+
+    /* footer */
+    app.appendChild(el('footer', null, data.footer || ''));
+  }
+
+  /* ---------- первичная загрузка ---------- */
+  function loadInitial() {
+    var saved = null;
+    try { saved = localStorage.getItem(STORAGE_KEY); } catch (e) {}
+    var raw = saved || ORIGINAL_RAW;
+    try {
+      render(JSON.parse(raw));
+    } catch (e) {
+      render(JSON.parse(ORIGINAL_RAW));
+    }
+  }
+
+  /* ---------- работа панели ---------- */
+  function setStatus(text, kind) {
+    statusEl.textContent = text;
+    statusEl.className = kind || '';
+  }
+
+  function openPanel() {
+    textarea.value = JSON.stringify(currentData, null, 2);
+    panel.classList.add('open');
+    document.body.classList.add('editor-open');
+    setStatus('Ctrl+Enter — применить · Tab — отступ 2 пробела');
+    setTimeout(function () { textarea.focus(); }, 60);
+  }
+
+  function closePanel() {
+    panel.classList.remove('open');
+    document.body.classList.remove('editor-open');
+  }
+
+  function applyEdits() {
+    var text = textarea.value;
+    var data;
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      setStatus('✗ Ошибка JSON: ' + e.message, 'err');
+      return;
+    }
+    try {
+      render(data);
+    } catch (e) {
+      setStatus('✗ Ошибка отрисовки: ' + e.message, 'err');
+      return;
+    }
+    try { localStorage.setItem(STORAGE_KEY, text); } catch (e) {}
+    setStatus('✓ Применено и сохранено в браузере', 'ok');
+    setTimeout(closePanel, 450);
+  }
+
+  function resetAll() {
+    if (!confirm('Сбросить все изменения и вернуть исходные данные?')) return;
+    try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+    render(JSON.parse(ORIGINAL_RAW));
+    textarea.value = JSON.stringify(currentData, null, 2);
+    setStatus('↺ Сброшено к исходному page-data', 'ok');
+  }
+
+  /* ---------- события ---------- */
+  toggleBtn.addEventListener('click', openPanel);
+  btnClose.addEventListener('click', closePanel);
+  btnApply.addEventListener('click', applyEdits);
+  btnReset.addEventListener('click', resetAll);
+
+  textarea.addEventListener('keydown', function (e) {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      var s = this.selectionStart, en = this.selectionEnd;
+      this.value = this.value.substring(0, s) + '  ' + this.value.substring(en);
+      this.selectionStart = this.selectionEnd = s + 2;
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      applyEdits();
+    }
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      closePanel();
     }
   });
-  document.body.appendChild(main);
 
-  /* -------- FOOTER -------- */
-  document.body.appendChild(el('footer', null, data.footer));
+  /* ---------- поехали ---------- */
+  loadInitial();
 })();
 </script>
 
