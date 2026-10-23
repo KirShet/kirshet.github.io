@@ -30,6 +30,11 @@ canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;displa
 </head>
 <body>
 <div class="bar" id="tools"></div>
+<div class="bar" id="fpb" hidden>
+  <label>Поле зрения <input type="range" id="fpf" min="40" max="120" value="69"><span id="fpfv">69°</span></label>
+  <label>Наклон камеры <input type="range" id="fpp" min="-40" max="40" value="0"><span id="fppv">0°</span></label>
+  <button id="fpr">Сбросить</button>
+</div>
 <div class="bar" id="pal"></div>
 <div class="bar" id="abl" hidden>
   <span style="font-size:12px;opacity:.8">Стихия:</span><span id="abE" style="display:flex;gap:6px;flex-wrap:wrap"></span>
@@ -251,7 +256,7 @@ function rayPrim(p,px,py,rdx,rdy,ccx,ccy){
  const hx=px+rdx*tmin,hy=py+rdy*tmin,u=side===0?(hy-(cy-p.d/2))/p.d:(hx-(cx-p.w/2))/p.w;
  return{t0:tmin,t1:tmax,nx:side===0?sg:0,ny:side===1?sg:0,u,side};
 }
-function fpsOff(){fps=null;document.getElementById('fbtn').classList.remove('on');draw()}
+function fpsOff(){fps=null;document.getElementById('fbtn').classList.remove('on');document.getElementById('fpb').hidden=true;draw()}
 function fpsStep(c,nx,ny){
  const k=ck(nx,ny),o=objs[k];
  if(!ter[k]||(o&&o.t!=='door')||chars.some(q=>q!==c&&q.x===nx&&q.y===ny))return;
@@ -263,6 +268,9 @@ function fpsKey(e){
  const c=chars.find(q=>q.id===fps.id);if(!c)return false;
  if(k==='a'||k==='arrowleft'){fps.yaw-=Math.PI/8;draw();return true}
  if(k==='d'||k==='arrowright'){fps.yaw+=Math.PI/8;draw();return true}
+ if(k==='r'){fps.pitch=Math.min(.85,(fps.pitch||0)+.08);fpSync();draw();return true}
+ if(k==='f'){fps.pitch=Math.max(-.85,(fps.pitch||0)-.08);fpSync();draw();return true}
+ if(k==='z'||k==='x'){fps.fov=Math.max(.7,Math.min(2.1,fps.fov+(k==='x'?.1:-.1)));fpSync();draw();return true}
  if(k==='q'){fps.yaw-=Math.PI/2;draw();return true}
  if(k==='e'){fps.yaw+=Math.PI/2;draw();return true}
  if(k==='w'||k==='arrowup'||k==='s'||k==='arrowdown'){
@@ -272,12 +280,17 @@ function fpsKey(e){
  }
  return false;
 }
+const fpb=document.getElementById('fpb'),fpf=document.getElementById('fpf'),fpp=document.getElementById('fpp');
+function fpSync(){if(!fps)return;fpf.value=Math.round(fps.fov*180/Math.PI);document.getElementById('fpfv').textContent=fpf.value+'°';const d=Math.round(Math.atan(fps.pitch||0)*180/Math.PI);fpp.value=d;document.getElementById('fppv').textContent=d+'°'}
+fpf.oninput=()=>{if(fps){fps.fov=fpf.value*Math.PI/180;fpSync();draw()}};
+fpp.oninput=()=>{if(fps){fps.pitch=Math.tan(fpp.value*Math.PI/180);fpSync();draw()}};
+document.getElementById('fpr').onclick=()=>{if(fps){fps.fov=1.2;fps.pitch=0;fpSync();draw()}};
 document.getElementById('fbtn').onclick=()=>{
  if(fps){fpsOff();return}
  const c=chars.find(q=>q.id===sel);
  if(!c){flash('Сначала выберите персонажа (✋ и клик по нему)');return}
  if(ab)abOff();ruler=null;
- fps={id:c.id,yaw:Math.atan2(-cs,-sn)};document.getElementById('fbtn').classList.add('on');
+ fps={id:c.id,yaw:Math.atan2(-cs,-sn),fov:1.2,pitch:0};document.getElementById('fbtn').classList.add('on');fpb.hidden=false;fpSync();
  flash('Вид от первого лица: W/S — шаг, A/D или перетаскивание — поворот, Esc — выход');draw();
 };
 function drawFps(){
@@ -285,7 +298,7 @@ function drawFps(){
  if(!c){fpsOff();return}
  const rw=Math.min(380,Math.ceil(W/2)),rh=Math.max(60,Math.ceil(rw*H/W));
  if(!fpc||fpc.width!==rw||fpc.height!==rh){fpc=document.createElement('canvas');fpc.width=rw;fpc.height=rh;fpx=fpc.getContext('2d')}
- const LMf=(vision&&chars.length)?lightMapC():null,tf=Math.tan(.6),f=(rw/2)/tf,hz=rh/2,eye=1,MAXD=Math.min(vr+3,26);
+ const LMf=(vision&&chars.length)?lightMapC():null,tf=Math.tan((fps.fov||1.2)/2),f=(rw/2)/tf,hz=rh/2+(fps.pitch||0)*f,eye=1,MAXD=Math.min(vr+3,26);
  const px=c.x+.5,py=c.y+.5,dx=Math.cos(fps.yaw),dy=Math.sin(fps.yaw),rx=-dy,ry=dx;
  const lt2=(x,y)=>{if(!LMf)return null;return LMf[ck(Math.floor(x),Math.floor(y))]||0};
  const shade=(col,e,dist,f0)=>{
@@ -365,7 +378,7 @@ function drawFps(){
  }
  g.imageSmoothingEnabled=false;g.drawImage(fpc,0,0,rw,rh,0,0,W,H);
  g.fillStyle='rgba(255,255,255,.85)';g.fillRect(W/2-1,H/2-8,2,16);g.fillRect(W/2-8,H/2-1,16,2);
- const txt='🎥 '+c.name+' · W/S — шаг · A/D или перетаскивание — поворот · Esc — выход';
+ const txt='🎥 '+c.name+' · W/S — шаг · A/D или перетаскивание — поворот · R/F — вверх/вниз · Z/X или колесо — обзор · Esc — выход';
  g.font='600 13px system-ui,sans-serif';g.textAlign='left';g.textBaseline='alphabetic';
  const tw=g.measureText(txt).width+16;g.fillStyle='rgba(20,16,10,.8)';g.fillRect(8,8,tw,26);g.fillStyle='#fff';g.fillText(txt,16,26);
 }
@@ -826,7 +839,7 @@ function apply(x,y){
 cv.addEventListener('contextmenu',e=>e.preventDefault());
 cv.addEventListener('pointerdown',e=>{
  cv.setPointerCapture(e.pointerId);
- if(fps){drag={mode:'look',x:e.clientX,a:fps.yaw};return}
+ if(fps){drag={mode:'look',x:e.clientX,y:e.clientY,a:fps.yaw,p:fps.pitch||0};return}
  if(e.button===1||e.altKey){drag={mode:'pan',x:e.clientX,y:e.clientY,px:panX,py:panY};e.preventDefault();return}
  if(e.button===2){
   const c0=cellAt(e),ch0=c0&&chars.find(q=>q.x===c0[0]&&q.y===c0[1]);
@@ -850,7 +863,7 @@ cv.addEventListener('pointerdown',e=>{
  last=c.join();drag.fresh=false;draw();
 });
 cv.addEventListener('pointermove',e=>{
- if(fps){if(drag&&drag.mode==='look'){fps.yaw=drag.a+(e.clientX-drag.x)*0.006;draw()}return}
+ if(fps){if(drag&&drag.mode==='look'){fps.yaw=drag.a+(e.clientX-drag.x)*0.006;fps.pitch=Math.max(-.85,Math.min(.85,drag.p-(e.clientY-drag.y)*0.004));fpSync();draw()}return}
  if(drag&&drag.mode==='rot'){if(Math.abs(e.clientX-drag.x)>3)drag.moved=true;setAng(drag.a+(e.clientX-drag.x)*0.01);return}
  if(drag&&drag.mode==='pan'){panX=drag.px+e.clientX-drag.x;panY=drag.py+e.clientY-drag.y;draw();return}
  const chh=chkAt(e);
@@ -870,7 +883,8 @@ cv.addEventListener('pointermove',e=>{
 });
 cv.addEventListener('pointerup',()=>{clearTimeout(lp);if(drag&&drag.mode==='tool')save();if(drag&&drag.mode==='rot'&&!drag.moved&&drag.off)ruler=null;drag=null;last=null;draw()});
 cv.addEventListener('pointerleave',()=>{hover=null;hoverPlus=null;draw()});
-cv.addEventListener('wheel',e=>{e.preventDefault();zoom=Math.max(0.3,Math.min(4,zoom*(e.deltaY<0?1.1:0.9)));draw()},{passive:false});
+cv.addEventListener('wheel',e=>{e.preventDefault();
+ if(fps){fps.fov=Math.max(.7,Math.min(2.1,fps.fov*(e.deltaY<0?.95:1.05)));fpSync();draw();return}zoom=Math.max(0.3,Math.min(4,zoom*(e.deltaY<0?1.1:0.9)));draw()},{passive:false});
 cv.addEventListener('dragover',e=>e.preventDefault());
 cv.addEventListener('drop',e=>{
  e.preventDefault();const f=e.dataTransfer.files[0];if(!f||!f.type.startsWith('image/'))return;
