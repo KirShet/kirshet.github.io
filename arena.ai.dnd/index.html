@@ -30,6 +30,11 @@ canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;displa
 </head>
 <body>
 <div class="bar" id="tools"></div>
+<div class="bar" id="brb" hidden>
+  <span style="font-size:12px;opacity:.8">Кисть:</span><span id="brB" style="display:flex;gap:6px;flex-wrap:wrap"></span>
+  <label>Размер <input type="range" id="bmZ" min="3" max="16" value="8"><span id="bmV">8 кл.</span></label>
+  <button id="bmR" title="Повернуть здание (R)">⟳ Повернуть</button><button id="bmU" title="Ctrl+Z">↶ Отмена</button>
+</div>
 <div class="bar" id="fpb" hidden>
   <label>Поле зрения <input type="range" id="fpf" min="40" max="120" value="69"><span id="fpfv">69°</span></label>
   <label>Наклон камеры <input type="range" id="fpp" min="-40" max="40" value="0"><span id="fppv">0°</span></label>
@@ -49,6 +54,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;displa
   <button id="cmF" title="Камера вперёд (W)">▲ Вперёд</button><button id="cmB" title="Камера назад (S)">▼ Назад</button><button id="cmL" title="Влево (A)">◀</button><button id="cmR" title="Вправо (D)">▶</button>
   <button id="vis" class="on" title="Свет и зрение персонажей">👁 Зрение</button><label>Радиус <input type="range" id="vr" min="3" max="20" value="20"></label>
   <button id="rul" title="Расстояние от выбранного персонажа">📏 Линейка</button>
+  <button id="bbtn" title="Умные кисти: здания, леса, пляжи, острова">🖌 Кисти</button>
   <button id="fbtn" title="Вид глазами выбранного персонажа">🎥 Вид от 1-го лица</button>
   <button id="abtn" title="Магическая способность выбранного персонажа">✨ Способность</button>
   <label>Свет <input type="color" id="vc" value="#ffcf8a" title="Цвет зрения выбранного персонажа"></label>
@@ -93,9 +99,9 @@ const ck=(x,y)=>x+','+y, rnd=Math.random, pick=a=>a[rnd()*a.length|0];
 
 // ---------- UI ----------
 const tb=document.getElementById('tools'), pal=document.getElementById('pal');
-TOOLS.forEach(([k,n])=>{const b=document.createElement('button');b.textContent=n;b.dataset.k=k;b.onclick=()=>{tool=k;terr=null;ui()};tb.appendChild(b)});
+TOOLS.forEach(([k,n])=>{const b=document.createElement('button');b.textContent=n;b.dataset.k=k;b.onclick=()=>{if(bm)bmOff();tool=k;terr=null;ui()};tb.appendChild(b)});
 const lab=document.createElement('span');lab.textContent='Почва:';lab.style.cssText='font-size:12px;opacity:.8';pal.appendChild(lab);
-Object.keys(TER).forEach(k=>{const b=document.createElement('button');b.className='sw';b.title=TER[k].n;b.dataset.k=k;b.style.background=`rgb(${TER[k].c})`;b.onclick=()=>{tool='paint';terr=k;ui()};pal.appendChild(b)});
+Object.keys(TER).forEach(k=>{const b=document.createElement('button');b.className='sw';b.title=TER[k].n;b.dataset.k=k;b.style.background=`rgb(${TER[k].c})`;b.onclick=()=>{if(bm)bmOff();tool='paint';terr=k;ui()};pal.appendChild(b)});
 function ui(){
  tb.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.k===tool));
  pal.querySelectorAll('.sw').forEach(b=>b.classList.toggle('on',tool==='paint'&&b.dataset.k===terr));
@@ -133,7 +139,7 @@ document.getElementById('abtn').onclick=()=>{
  if(ab){abOff();draw();return}
  const c=chars.find(q=>q.id===sel);
  if(!c){flash('Сначала выберите персонажа (✋ и клик по нему)');return}
- if(fps)fpsOff();ruler=null;ab={id:c.id,to:[c.x,c.y],set:false};abBar.hidden=false;abUi();
+ if(bm)bmOff();if(fps)fpsOff();ruler=null;ab={id:c.id,to:[c.x,c.y],set:false};abBar.hidden=false;abUi();
  flash('Наведите — область, клик — применить; ПКМ по другому персонажу — сменить заклинателя; Esc — выход');draw();
 };
 function abCells(){
@@ -160,7 +166,7 @@ function abCells(){
  }
  return out;
 }
-function abCast(){
+function abCast(){undoPush();
  for(const[x,y]of abCells()){
   const k=ck(x,y),t=ter[k];
   if(abEl==='water'){if(t==='lava')ter[k]='stone';else if(t!=='water')ter[k]='puddle'}
@@ -280,6 +286,126 @@ function fpsKey(e){
  }
  return false;
 }
+// ---------- умные кисти ----------
+const BRS={building:['🏠','Здание','255,200,90'],forest:['🌲','Лес','60,190,90'],beach:['🏖','Пляж','240,210,130'],island:['🏝','Остров','90,200,170'],lake:['🌊','Озеро','70,140,240']};
+const LANDT={grass:1,tall:1,dirt:1,sand:1,field:1,plow:1,flowers:1,burnt:1,snow:1};
+let bm=null,bmSize=8,undoSt=[];
+const bmBar=document.getElementById('brb');
+function undoPush(){undoSt.push({ter:Object.assign({},ter),objs:JSON.parse(JSON.stringify(objs))});if(undoSt.length>30)undoSt.shift()}
+function undo(){const s=undoSt.pop();if(!s){flash('Нечего отменять');return}ter=s.ter;objs=s.objs;save();draw()}
+function bmUi(){
+ bmBar.querySelectorAll('button[data-b]').forEach(b=>b.classList.toggle('on',!!bm&&b.dataset.b===bm.type));
+ document.getElementById('bmV').textContent=bmSize+' кл.';
+ document.getElementById('bbtn').classList.toggle('on',!!bm);
+}
+Object.keys(BRS).forEach(k=>{const b=document.createElement('button');b.textContent=BRS[k][0]+' '+BRS[k][1];b.dataset.b=k;b.onclick=()=>{if(bm)bm.type=k;bmUi();draw()};document.getElementById('brB').appendChild(b)});
+document.getElementById('bmZ').oninput=e=>{bmSize=+e.target.value;bmUi();draw()};
+document.getElementById('bmR').onclick=()=>{if(bm){bm.rot=!bm.rot;draw()}};
+document.getElementById('bmU').onclick=undo;
+function bmOff(){bm=null;bmBar.hidden=true;bmUi();draw()}
+document.getElementById('bbtn').onclick=()=>{
+ if(bm){bmOff();return}
+ if(ab)abOff();ruler=null;if(fps)fpsOff();
+ bm={type:'forest',to:[0,0],rot:false};bmBar.hidden=false;bmUi();
+ flash('Кисть: клик — поставить (лес и пляж можно рисовать зажав), R — повернуть здание, Ctrl+Z — отмена, Esc — выход');draw();
+};
+const hasCh=(x,y)=>chars.some(q=>q.x===x&&q.y===y);
+const nzv=(x,y,s)=>(hs(Math.floor(x*s)+7,Math.floor(y*s)+13)&255)/255;
+function putO(x,y,t){const k=ck(x,y);if(ter[k]&&!objs[k]&&!hasCh(x,y)&&!LIQ[ter[k]])objs[k]={t,r:0}}
+function dsc(c,r){const o=[],R=Math.ceil(r);for(let y=c[1]-R;y<=c[1]+R;y++)for(let x=c[0]-R;x<=c[0]+R;x++)if(Math.hypot(x-c[0],y-c[1])<=r+.01&&ter[ck(x,y)])o.push([x,y]);return o}
+function bldDims(){const w=Math.max(5,bmSize),h=Math.max(4,Math.round(w*.75));return bm.rot?[h,w]:[w,h]}
+function bmCells(){
+ const c=bm.to,out=[];
+ if(bm.type==='building'){const[w,h]=bldDims(),x0=c[0]-Math.floor(w/2),y0=c[1]-Math.floor(h/2);for(let y=y0;y<y0+h;y++)for(let x=x0;x<x0+w;x++)if(ter[ck(x,y)])out.push([x,y]);return out}
+ return dsc(c,bm.type==='island'?bmSize/2+2.5:bmSize/2);
+}
+function drawBm(){
+ if(!bm)return;
+ const rgb=BRS[bm.type][2];
+ bmCells().forEach(([x,y])=>poly([P(x,y,.03),P(x+1,y,.03),P(x+1,y+1,.03),P(x,y+1,.03)],`rgba(${rgb},.28)`,`rgba(${rgb},.75)`));
+}
+function bForest(c){
+ const r=bmSize/2;
+ for(const[x,y]of dsc(c,r*1.1)){
+  const k=ck(x,y),tn=ter[k],d=Math.hypot(x-c[0],y-c[1])/r;
+  if(d>.88+.3*nzv(x,y,.9))continue;
+  if(LIQ[tn]||tn==='puddle'||tn==='stone'||tn==='wood'||hasCh(x,y))continue;
+  if(objs[k]&&objs[k].t!=='tree'&&objs[k].t!=='rock')continue;
+  const clear=nzv(x,y,.35)>.8&&d<.9;
+  if(['grass','tall','flowers','dirt','field','plow','burnt'].includes(tn))ter[k]=clear?(rnd()<.4?'flowers':'grass'):(rnd()<.4?'tall':'grass');
+  if(clear||!['grass','tall','snow'].includes(ter[k]))continue;
+  if(!objs[k]&&rnd()<.46-.22*d*d)objs[k]={t:'tree',r:0};
+  else if(!objs[k]&&rnd()<.03)objs[k]={t:'rock',r:0};
+ }
+}
+function bBeach(c){
+ const r=bmSize/2,R=Math.ceil(r)+6,water=[];
+ for(let y=c[1]-R;y<=c[1]+R;y++)for(let x=c[0]-R;x<=c[0]+R;x++)if(ter[ck(x,y)]==='water')water.push([x,y]);
+ if(!water.length){flash('Рядом нет воды — сначала нарисуйте воду или озеро');return}
+ for(const[x,y]of dsc(c,r)){
+  const k=ck(x,y),tn=ter[k];if(!LANDT[tn]&&tn!=='puddle')continue;
+  let dw=1e9;for(const[a,b]of water){const d=Math.hypot(a-x,b-y);if(d<dw)dw=d}
+  let nt=null;
+  if(dw<=1.5)nt=rnd()<.45?'puddle':'sand';
+  else if(dw<=3)nt='sand';
+  else if(dw<=4.5)nt=rnd()<.7?'sand':'dirt';
+  else if(dw<=6)nt=rnd()<.25?'dirt':null;
+  if(nt){ter[k]=nt;const o=objs[k];if(o&&o.t==='tree'&&rnd()<.8)delete objs[k];if(!objs[k]&&nt==='sand'&&dw>2&&rnd()<.03)putO(x,y,'rock')}
+ }
+}
+function bIsland(c,lake){
+ const r=bmSize/2,ph=[rnd()*6.28,rnd()*6.28,rnd()*6.28],A=[.22,.15,.1];
+ const rad=th=>r*(1+A[0]*Math.sin(2*th+ph[0])+A[1]*Math.sin(3*th+ph[1])+A[2]*Math.sin(5*th+ph[2])),R=Math.ceil(r*1.5+4);
+ for(let y=c[1]-R;y<=c[1]+R;y++)for(let x=c[0]-R;x<=c[0]+R;x++){
+  const k=ck(x,y);if(!ter[k])continue;
+  const dx=x-c[0],dy=y-c[1],rr=Math.max(1,rad(Math.atan2(dy,dx))),q=Math.hypot(dx,dy)/rr;
+  if(!lake){
+   if(q<=.62){ter[k]=nzv(x,y,.5)>.85?'flowers':(rnd()<.3?'tall':'grass');delete objs[k];if(q<.5&&rnd()<.22)putO(x,y,'tree');else if(rnd()<.04)putO(x,y,'rock')}
+   else if(q<=.86){ter[k]='sand';delete objs[k];if(rnd()<.03)putO(x,y,'rock')}
+   else if(q<=1+1.1/rr){ter[k]='puddle';delete objs[k]}
+   else if(q<=1+3/rr){ter[k]='water';delete objs[k]}
+  }else{
+   if(q<=.72){ter[k]='water';delete objs[k]}
+   else if(q<=.95){ter[k]='puddle';delete objs[k]}
+   else if(q<=1.25&&LANDT[ter[k]]){if(rnd()<.75)ter[k]='sand';if(objs[k]&&objs[k].t==='tree'&&rnd()<.7)delete objs[k]}
+  }
+ }
+}
+function bBuilding(c){
+ const[w,h]=bldDims(),x0=c[0]-Math.floor(w/2),y0=c[1]-Math.floor(h/2);
+ for(let y=y0;y<y0+h;y++)for(let x=x0;x<x0+w;x++)if(!ter[ck(x,y)]){flash('Для здания не хватает места: достройте арену');return}
+ const big=w>=10||h>=10,fl=big?'stone':'wood',E=(x,y)=>x===x0||y===y0||x===x0+w-1||y===y0+h-1;
+ for(let y=y0;y<y0+h;y++)for(let x=x0;x<x0+w;x++){
+  const k=ck(x,y);delete objs[k];ter[k]=E(x,y)?'stone':fl;
+  if(E(x,y)&&!hasCh(x,y))objs[k]={t:'wall',r:0};
+ }
+ const sides=[[0,-1],[0,1],[-1,0],[1,0]];
+ const score=sides.map(([sx,sy])=>{
+  let n=0;const len=sx?h:w;
+  for(let i=0;i<len;i++){const x=sx?(sx<0?x0-1:x0+w):x0+i,y=sx?y0+i:(sy<0?y0-1:y0+h),tn=ter[ck(x,y)];if(tn&&!LIQ[tn]&&!objs[ck(x,y)])n++}
+  return n+rnd()*.5;
+ });
+ let bs=0;score.forEach((s,i)=>{if(s>score[bs])bs=i});
+ const door=si=>{const[sx,sy]=sides[si];let x,y;if(sx){x=sx<0?x0:x0+w-1;y=y0+1+(rnd()*(h-2)|0)}else{y=sy<0?y0:y0+h-1;x=x0+1+(rnd()*(w-2)|0)}objs[ck(x,y)]={t:'door',r:sx?1:0}};
+ door(bs);if(big||w+h>=18)door(bs^1);
+ if(Math.max(w,h)>=8){
+  if(w>=h){const px=x0+(w>>1),gap=y0+1+(rnd()*(h-2)|0);for(let y=y0+1;y<y0+h-1;y++){if(hasCh(px,y))continue;objs[ck(px,y)]=y===gap?{t:'door',r:1}:{t:'wall',r:0}}}
+  else{const py=y0+(h>>1),gap=x0+1+(rnd()*(w-2)|0);for(let x=x0+1;x<x0+w-1;x++){if(hasCh(x,py))continue;objs[ck(x,py)]=x===gap?{t:'door',r:0}:{t:'wall',r:0}}}
+ }
+ let nc=0;
+ const nb=[[1,0],[-1,0],[0,1],[0,-1]];
+ for(let y=y0+1;y<y0+h-1;y++)for(let x=x0+1;x<x0+w-1;x++){
+  const k=ck(x,y);if(objs[k]||hasCh(x,y))continue;
+  const nw=nb.some(([a,b])=>{const o=objs[ck(x+a,y+b)];return o&&o.t==='wall'}),nd=nb.some(([a,b])=>{const o=objs[ck(x+a,y+b)];return o&&o.t==='door'});
+  if(nd||!nw)continue;
+  if(rnd()<.1)objs[k]={t:'barrel',r:0};else if(nc<3&&rnd()<.05){objs[k]={t:'chest',r:0};nc++}
+ }
+}
+function bmApply(c){
+ const t=bm.type;
+ if(t==='building')bBuilding(c);else if(t==='forest')bForest(c);else if(t==='beach')bBeach(c);else bIsland(c,t==='lake');
+}
+const bmDrag=()=>bm&&(bm.type==='forest'||bm.type==='beach');
 const fpb=document.getElementById('fpb'),fpf=document.getElementById('fpf'),fpp=document.getElementById('fpp');
 function fpSync(){if(!fps)return;fpf.value=Math.round(fps.fov*180/Math.PI);document.getElementById('fpfv').textContent=fpf.value+'°';const d=Math.round(Math.atan(fps.pitch||0)*180/Math.PI);fpp.value=d;document.getElementById('fppv').textContent=d+'°'}
 fpf.oninput=()=>{if(fps){fps.fov=fpf.value*Math.PI/180;fpSync();draw()}};
@@ -289,7 +415,7 @@ document.getElementById('fbtn').onclick=()=>{
  if(fps){fpsOff();return}
  const c=chars.find(q=>q.id===sel);
  if(!c){flash('Сначала выберите персонажа (✋ и клик по нему)');return}
- if(ab)abOff();ruler=null;
+ if(bm)bmOff();if(ab)abOff();ruler=null;
  fps={id:c.id,yaw:Math.atan2(-cs,-sn),fov:1.2,pitch:0};document.getElementById('fbtn').classList.add('on');fpb.hidden=false;fpSync();
  flash('Вид от первого лица: W/S — шаг, A/D или перетаскивание — поворот, Esc — выход');draw();
 };
@@ -385,7 +511,7 @@ function drawFps(){
 const vcIn=document.getElementById('vc');
 vcIn.oninput=()=>{const c=chars.find(q=>q.id===sel);if(c){c.vc=vcIn.value;save();draw()}else flash('Сначала выберите персонажа (✅ инструмент «✋ Двигать» и клик по нему)')};
 document.getElementById('rul').onclick=()=>{
- if(fps)fpsOff();if(ab)abOff();if(ruler)ruler=null;
+ if(bm)bmOff();if(fps)fpsOff();if(ab)abOff();if(ruler)ruler=null;
  else{const c=chars.find(q=>q.id===sel);if(c)ruler={from:[c.x,c.y],to:[c.x,c.y]};else flash('Выберите персонажа или зажмите его / нажмите правой кнопкой')}
  draw();
 };
@@ -453,7 +579,9 @@ function lightMap(){
 function moveCam(f,s){const st=0.35;ox+=(-sn*f+cs*s)*st;oy+=(-cs*f-sn*s)*st;draw()}
 addEventListener('keydown',e=>{
  if(e.target.tagName==='INPUT')return;
- const k=e.key;if(fps&&fpsKey(e)){e.preventDefault();return}if(k==='Escape'){ruler=null;if(ab)abOff();draw()}
+ if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){undo();e.preventDefault();return}
+ const k=e.key;if(fps&&fpsKey(e)){e.preventDefault();return}
+ if(bm&&(k==='r'||k==='R')){bm.rot=!bm.rot;draw();return}if(k==='Escape'){ruler=null;if(ab)abOff();if(bm)bmOff();draw()}
  if(k==='q'||k==='Q')setAng(ang-Math.PI/2);
  if(k==='e'||k==='E')setAng(ang+Math.PI/2);
  if(k==='w'||k==='W'||k==='ArrowUp'){moveCam(1,0);e.preventDefault()}
@@ -805,7 +933,7 @@ function draw(){
   const w=g.measureText(txt).width+14;
   g.fillStyle='rgba(20,16,10,.92)';g.fillRect(mx-w/2,my-fs-2,w,fs+10);g.fillStyle='#ffd34d';g.fillText(txt,mx,my+2);
  }
- drawAb();
+ drawAb();drawBm();
  steam.forEach(p=>{if(LM&&!LM[ck(Math.floor(p.x),Math.floor(p.y))])return;const t=p.a/p.m,q=P(p.x,p.y,p.z);g.beginPath();g.arc(q[0],q[1],S*(p.r+0.28*t),0,6.2832);g.fillStyle=`rgba(238,242,247,${(0.4*(1-t)).toFixed(3)})`;g.fill()});
  plusList().forEach(([cx,cy])=>{
   const hv=hoverPlus&&hoverPlus[0]===cx&&hoverPlus[1]===cy;
@@ -851,9 +979,10 @@ cv.addEventListener('pointerdown',e=>{
  const pl=plusAt(e);
  if(pl){gen(pl[0],pl[1],getOpts(pl));fit();save();drag=null;draw();return}
  const c=cellAt(e);if(!c){drag=null;return}
+ if(bm){bm.to=c;undoPush();bmApply(c);drag={mode:'brush',last:c.join()};draw();return}
  if(ab){abPress(e,c);drag=null;draw();return}
  if(ruler){const rc=chars.find(q=>q.x===c[0]&&q.y===c[1]);if(rc)ruler.from=[rc.x,rc.y];ruler.to=c;drag={mode:'ruler'};draw();return}
- drag={mode:'tool',fresh:true,char:null};
+ if(tool!=='move')undoPush();drag={mode:'tool',fresh:true,char:null};
  if(tool==='move'){
   const ch=chars.find(q=>q.x===c[0]&&q.y===c[1]);sel=ch?ch.id:null;drag.char=ch||null;
   clearTimeout(lp);
@@ -870,7 +999,8 @@ cv.addEventListener('pointermove',e=>{
  if(chh){hint.textContent='☑ '+chh.b.n+' — включить/выключить для нового блока';hint.dataset.c=1}else if(hint.dataset.c){hint.textContent=HINT;delete hint.dataset.c}
  const c=cellAt(e);hover=c;hoverPlus=chh?null:plusAt(e);
  if(ruler&&c)ruler.to=c;if(ab&&c)ab.to=c;
- if(drag&&c&&c.join()!==last){
+ if(bm&&c){bm.to=c;if(drag&&drag.mode==='brush'&&bmDrag()&&c.join()!==drag.last){drag.last=c.join();bmApply(c)}}
+ if(drag&&drag.mode==='tool'&&c&&c.join()!==last){
   last=c.join();
   if(tool==='move'){
    const o=objs[ck(c[0],c[1])];
@@ -881,7 +1011,7 @@ cv.addEventListener('pointermove',e=>{
  cv.style.cursor=(hoverPlus||chh)?'pointer':'default';
  draw();
 });
-cv.addEventListener('pointerup',()=>{clearTimeout(lp);if(drag&&drag.mode==='tool')save();if(drag&&drag.mode==='rot'&&!drag.moved&&drag.off)ruler=null;drag=null;last=null;draw()});
+cv.addEventListener('pointerup',()=>{clearTimeout(lp);if(drag&&(drag.mode==='tool'||drag.mode==='brush'))save();if(drag&&drag.mode==='rot'&&!drag.moved&&drag.off)ruler=null;drag=null;last=null;draw()});
 cv.addEventListener('pointerleave',()=>{hover=null;hoverPlus=null;draw()});
 cv.addEventListener('wheel',e=>{e.preventDefault();
  if(fps){fps.fov=Math.max(.7,Math.min(2.1,fps.fov*(e.deltaY<0?.95:1.05)));fpSync();draw();return}zoom=Math.max(0.3,Math.min(4,zoom*(e.deltaY<0?1.1:0.9)));draw()},{passive:false});
