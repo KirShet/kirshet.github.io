@@ -33,6 +33,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;displa
 <div class="bar" id="lvb">
   <span style="font-size:12px;opacity:.8">Уровни:</span><span id="lvB" style="display:flex;gap:6px;flex-wrap:wrap"></span>
   <button id="lvAdd" title="Добавить этаж над верхним">➕ Этаж</button><button id="lvDel" title="Удалить верхний этаж">🗑</button>
+  <button id="lvAddB" title="Добавить подвал под нижним уровнем">➕ Подвал</button><button id="lvDelB" title="Удалить нижний подвал (нажать дважды)">🗑 подвал</button>
   <button id="lvUp" title="Поднять выбранного персонажа на этаж выше">⇧ Персонаж выше</button><button id="lvDn" title="Опустить выбранного персонажа на этаж ниже">⇩ ниже</button>
   <label><input type="checkbox" id="lvAll"> показать верхние этажи</label>
 </div>
@@ -75,7 +76,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;displa
   <button id="clr">Сброс</button>
 </div>
 <div id="wrap"><canvas id="cv"></canvas>
-<div id="hint">Нажмите «+» у края арены, чтобы достроить область · правая кнопка/Shift — вращать · Alt/колёсико мыши — сдвиг · колесо — масштаб · W/S — камера вперёд/назад, A/D — вбок · Q/E — 90° · линейка: зажмите персонажа или правая кнопка по нему (Esc — выкл.) · лестницы: «🪜 Лестница ↑» / «🕳 Спуск ↓», потом перетащите персонажа на лестницу или дважды кликните по нему (Enter) · PgUp/PgDn — смотреть другой этаж</div></div>
+<div id="hint">Нажмите «+» у края арены, чтобы достроить область · правая кнопка/Shift — вращать · Alt/колёсико мыши — сдвиг · колесо — масштаб · W/S — камера вперёд/назад, A/D — вбок · Q/E — 90° · линейка: зажмите персонажа или правая кнопка по нему (Esc — выкл.) · лестницы: «🪜 Лестница ↑» / «🕳 Спуск ↓», потом перетащите персонажа на лестницу или дважды кликните по нему (Enter) · PgUp/PgDn — смотреть другой этаж · «Обрыв» в палитре почвы — дыра в полу: видно нижний этаж, персонаж упадёт вниз</div></div>
 <script>
 const C=8, cv=document.getElementById('cv'), g=cv.getContext('2d'), hint=document.getElementById('hint');
 const HINT=hint.textContent;
@@ -95,12 +96,13 @@ const TER={
  burnt:{n:'Выжженная земля',c:[54,44,40],d:[26,20,18],t:'dots'},
  flowers:{n:'Цветущие цветы',c:[104,160,70],d:[255,120,170],t:'flowers'}
 };
-const COMP={grass:['tall','field','dirt','sand','water','stone'],tall:['grass','dirt','water'],field:['grass','plow','dirt'],plow:['field','dirt'],dirt:['grass','sand','stone','plow','wood'],sand:['dirt','water','grass','stone'],stone:['dirt','snow','wood','lava','grass'],wood:['stone','dirt','grass'],water:['sand','grass','tall'],snow:['stone','grass','water'],lava:['stone','dirt'],puddle:['water','grass','dirt','sand'],burnt:['dirt','stone','grass','sand'],flowers:['grass','tall','field']};
+TER.void={n:'Обрыв (дыра в полу)',c:[14,12,10],d:[0,0,0],t:'dots'};
+const COMP={grass:['tall','field','dirt','sand','water','stone'],tall:['grass','dirt','water'],field:['grass','plow','dirt'],plow:['field','dirt'],dirt:['grass','sand','stone','plow','wood'],sand:['dirt','water','grass','stone'],stone:['dirt','snow','wood','lava','grass'],wood:['stone','dirt','grass'],water:['sand','grass','tall'],snow:['stone','grass','water'],lava:['stone','dirt'],puddle:['water','grass','dirt','sand'],burnt:['dirt','stone','grass','sand'],flowers:['grass','tall','field']};COMP.void=[];
 const TOOLS=[['move','✋ Двигать'],['cam','🧭 Камера'],['wall','Стена'],['column','Колонна'],['chest','Сундук'],['door','Дверь'],['ewall','Земл. стена'],['tree','Дерево'],['rock','Камень'],['barrel','Бочка'],['stairsU','🪜 Лестница ↑','Лестница на этаж выше (создаст этаж, если его нет). Повторный клик — повернуть'],['stairsD','🕳 Спуск ↓','Спуск на этаж ниже. Повторный клик — повернуть'],['erase','Ластик']];
 const PLACE=['wall','ewall','column','chest','door','tree','rock','barrel'];
 let tool='move', terr=null, ang=35*Math.PI/180, tilt=55*Math.PI/180, zoom=1;
 let ter={}, objs={}, chars=[], chunks=new Set(), imgs={}, sel=null, hover=null, hoverPlus=null;
-let LV=[],cur=0,ZO=0,showAbove=false,dimL=1;const LH=2.4;
+let LV=[],GZ=0,cur=0,ZO=0,showAbove=false,dimL=1;const LH=2.4;
 let W=0,H=0,S=30,sn=0,cs=1,T=1,Hc=0,ox=8,oy=8,ext=32,panX=0,panY=0;
 const ck=(x,y)=>x+','+y, rnd=Math.random, pick=a=>a[rnd()*a.length|0];
 
@@ -279,9 +281,9 @@ function rayPrim(p,px,py,rdx,rdy,ccx,ccy){
 function fpsOff(){fps=null;document.getElementById('fbtn').classList.remove('on');document.getElementById('fpb').hidden=true;draw()}
 function fpsStep(c,nx,ny){
  const k=ck(nx,ny),o=objs[k];
- if(!ter[k]||(o&&!WALK[o.t])||chars.some(q=>q!==c&&q.x===nx&&q.y===ny))return;
+ if(!ter[k]||(o&&!WALK[o.t])||(ter[k]==='void'&&!LV[cur-1])||chars.some(q=>q!==c&&q.x===nx&&q.y===ny))return;
  c.x=nx;c.y=ny;
- if(o&&STAIRS[o.t]&&stairsUse(c))return;
+ if(((o&&STAIRS[o.t])||ter[k]==='void')&&stairsUse(c))return;
  save();draw();
 }
 function fpsKey(e){
@@ -630,7 +632,7 @@ const fi=document.getElementById('fi');
 document.getElementById('img').onclick=()=>{if(!chars.find(c=>c.id===sel)){flash('Сначала выберите персонажа (✋ и клик по нему) или перетащите картинку прямо на него');return}fi.click()};
 fi.onchange=()=>{const c=chars.find(c=>c.id===sel);if(c&&fi.files[0])loadImg(c,fi.files[0]);fi.value=''};
 document.getElementById('noimg').onclick=()=>{const c=chars.find(c=>c.id===sel);if(c){delete c.img;delete imgs[c.id];save();draw()}};
-document.getElementById('clr').onclick=()=>{LV=[];cur=0;ZO=0;ter={};objs={};chars=[];chunks=new Set();imgs={};sel=null;undoSt=[];start();save()};
+document.getElementById('clr').onclick=()=>{LV=[];GZ=0;cur=0;ZO=0;ter={};objs={};chars=[];chunks=new Set();imgs={};sel=null;undoSt=[];start();save()};
 function setImg(c){const im=new Image();im.onload=draw;im.src=c.img;imgs[c.id]=im}
 function loadImg(c,file){
  const r=new FileReader();
@@ -642,7 +644,7 @@ function loadImg(c,file){
 }
 
 // ---------- generation ----------
-const LIQ={water:1,lava:1};
+const LIQ={water:1,lava:1,void:1};
 const freeAt=(x,y)=>{const k=ck(x,y);return ter[k]&&!objs[k]&&!LIQ[ter[k]]&&!chars.some(c=>c.x===x&&c.y===y)};
 function dens(t,cx,cy){
  let n=0,m=0;
@@ -655,7 +657,7 @@ function dens(t,cx,cy){
 function gen(cx,cy,op){op=op||{};const on=k=>op[k]!==false;
  const GR={tg:['grass','tall','field','plow'],te:['dirt','sand'],ts:['stone','snow','wood'],tw:['water'],tl:['lava']};
  const A={};for(const k in GR)if(on(k))GR[k].forEach(q=>A[q]=1);
- if(!Object.keys(A).length)Object.keys(TER).forEach(q=>A[q]=1);
+ if(!Object.keys(A).length)Object.keys(TER).forEach(q=>{if(q!=='void')A[q]=1});
  const Aarr=Object.keys(A);
  chunks.add(ck(cx,cy));
  const x0=cx*C,y0=cy*C,inC=(x,y)=>x>=x0&&x<x0+C&&y>=y0&&y<y0+C;
@@ -669,7 +671,7 @@ function gen(cx,cy,op){op=op||{};const on=k=>op[k]!==false;
   const next=[];let did=0;
   for(const[x,y]of left){
    const ns=[];
-   for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const t=ter[ck(x+dx,y+dy)];if(t)ns.push(t)}
+   for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const t=ter[ck(x+dx,y+dy)];if(t&&t!=='void')ns.push(t)}
    if(!ns.length){next.push([x,y]);continue}
    let t=pick(ns);
    if(rnd()<.1){const m=COMP[t].filter(q=>A[q]);if(m.length)t=pick(m)}
@@ -686,7 +688,7 @@ function gen(cx,cy,op){op=op||{};const on=k=>op[k]!==false;
  const SH={water:'sand',lava:'stone'};
  for(let j=0;j<C;j++)for(let i=0;i<C;i++){
   const x=x0+i,y=y0+j;if(LIQ[ter[ck(x,y)]])continue;
-  for(const[a,b]of[[1,0],[-1,0],[0,1],[0,-1]]){const n=ter[ck(x+a,y+b)];if(LIQ[n]&&rnd()<.55){ter[ck(x,y)]=SH[n];break}}
+  for(const[a,b]of[[1,0],[-1,0],[0,1],[0,-1]]){const n=ter[ck(x+a,y+b)];if(LIQ[n]&&SH[n]&&rnd()<.55){ter[ck(x,y)]=SH[n];break}}
  }
  // продолжение стен и колонн из соседних областей
  const edges=[];
@@ -753,7 +755,10 @@ function gen(cx,cy,op){op=op||{};const on=k=>op[k]!==false;
 }
 // ---------- уровни ----------
 function lvStore(){LV[cur]={ter,objs,chars,chunks}}
-function lvLoad(z){const L=LV[z];ter=L.ter;objs=L.objs;chars=L.chars;chunks=L.chunks;cur=z;ZO=z*LH}
+function lvLoad(z){const L=LV[z];ter=L.ter;objs=L.objs;chars=L.chars;chunks=L.chunks;cur=z;ZO=(z-GZ)*LH}
+const lvName=i=>i<GZ?'Подвал '+(GZ-i):i===GZ?'Земля':'Этаж '+(i-GZ);
+function addBasement(){lvStore();LV.unshift({ter:{},objs:{},chars:[],chunks:new Set()});GZ++;cur++;undoSt=[]}
+function ensureFloor(L,x,y){const cx=Math.floor(x/C),cy=Math.floor(y/C);if(L.chunks.has(ck(cx,cy)))return;L.chunks.add(ck(cx,cy));for(let j=0;j<C;j++)for(let i=0;i<C;i++){const kk=ck(cx*C+i,cy*C+j);if(!L.ter[kk])L.ter[kk]='stone'}}
 function lvSwitch(z){
  if(z===cur||!LV[z])return;
  lvStore();lvLoad(z);ruler=null;if(ab)abOff();hover=null;hoverPlus=null;
@@ -762,7 +767,7 @@ function lvSwitch(z){
 function lvUi(){
  if(LV[cur])lvStore();
  const bx=document.getElementById('lvB');bx.innerHTML='';
- LV.forEach((L,i)=>{const n=L.chars.length,b=document.createElement('button');b.textContent=(i===0?'Земля':'Этаж '+i)+(n?' · '+n:'');b.title='Персонажей на уровне: '+n;b.className=i===cur?'on':'';b.onclick=()=>lvSwitch(i);bx.appendChild(b)});
+ LV.forEach((L,i)=>{const n=L.chars.length,b=document.createElement('button');b.textContent=lvName(i)+(n?' · '+n:'');b.title='Персонажей на уровне: '+n;b.className=i===cur?'on':'';b.onclick=()=>lvSwitch(i);bx.appendChild(b)});
 }
 document.getElementById('lvAll').onchange=e=>{showAbove=e.target.checked;draw()};
 document.getElementById('lvAdd').onclick=()=>{
@@ -771,9 +776,9 @@ document.getElementById('lvAdd').onclick=()=>{
 };
 let lvDelT=0;
 document.getElementById('lvDel').onclick=()=>{
- if(LV.length<2){flash('Нельзя удалить нижний уровень');return}
+ if(LV.length-1<=GZ){flash('Выше земли этажей нет');return}
  if(cur!==LV.length-1){flash('Удалять можно только верхний этаж: переключитесь на него');return}
- if(Date.now()-lvDelT>3500){lvDelT=Date.now();flash('Нажмите ещё раз, чтобы удалить этаж '+cur+' вместе с блоками и персонажами');return}
+ if(Date.now()-lvDelT>3500){lvDelT=Date.now();flash('Нажмите ещё раз, чтобы удалить этаж '+(cur-GZ)+' вместе с блоками и персонажами');return}
  LV.pop();lvLoad(LV.length-1);for(const k in objs)if(objs[k].t==='stairsU')delete objs[k];lvUi();fit();save();draw();
 };
 function lvMove(dz){
@@ -781,16 +786,16 @@ function lvMove(dz){
  const so=objs[ck(c.x,c.y)];if(so&&((dz>0&&so.t==='stairsU')||(dz<0&&so.t==='stairsD'))){stairsUse(c);return}
  const z=cur+dz;if(!LV[z]){flash(dz>0?'Выше нет этажа':'Ниже нет уровня');return}
  lvStore();const L2=LV[z],k=ck(c.x,c.y);
- if(!L2.ter[k]){flash('На уровне «'+(z?'Этаж '+z:'Земля')+'» нет блока в этой клетке');return}
+ if(!L2.ter[k]){flash('На уровне «'+lvName(z)+'» нет блока в этой клетке');return}
  if((L2.objs[k]&&!WALK[L2.objs[k].t])||L2.chars.some(q=>q.x===c.x&&q.y===c.y)){flash('Клетка на том уровне занята');return}
  chars.splice(chars.indexOf(c),1);L2.chars.push(c);
  lvSwitch(z);sel=c.id;save();draw();
 }
-function lvEnter(){const c=chars.find(q=>q.id===sel),o=c&&objs[ck(c.x,c.y)];if(o&&STAIRS[o.t])stairsUse(c);else flash('Выберите персонажа, стоящего на лестнице')}
+function lvEnter(){const c=chars.find(q=>q.id===sel),o=c&&objs[ck(c.x,c.y)];if((o&&STAIRS[o.t])||(c&&ter[ck(c.x,c.y)]==='void'))stairsUse(c);else flash('Выберите персонажа, стоящего на лестнице или у обрыва')}
 function stairsUse(c){
  const k=ck(c.x,c.y),o=objs[k];
- if(!o||!STAIRS[o.t])return false;
- const z=cur+(o.t==='stairsU'?1:-1);
+ const vd=!(o&&STAIRS[o.t])&&ter[k]==='void';if(!vd&&!(o&&STAIRS[o.t]))return false;
+ const z=vd?cur-1:cur+(o.t==='stairsU'?1:-1);
  if(!LV[z]){flash(z>cur?'Выше нет этажа':'Ниже нет уровня');return false}
  lvStore();
  const L2=LV[z],o2=L2.objs[k];
@@ -798,7 +803,7 @@ function stairsUse(c){
  if((o2&&!WALK[o2.t])||L2.chars.some(q=>q.x===c.x&&q.y===c.y)){flash('Выход с лестницы занят');return false}
  chars.splice(chars.indexOf(c),1);L2.chars.push(c);
  lvSwitch(z);sel=c.id;save();draw();
- flash(c.name+' → '+(z?'Этаж '+z:'Земля'));
+ flash(c.name+(vd?' падает → ':' → ')+lvName(z));
  return true;
 }
 function stairsUnpair(k,o){
@@ -812,19 +817,27 @@ function stairsPlace(x,y,up){
   const p=LV[cur+(up?1:-1)]&&LV[cur+(up?1:-1)].objs[k];if(p&&STAIRS[p.t])p.r=o.r;
   flash('Лестница повёрнута');return;
  }
- const lo=up?cur:cur-1,hi=lo+1;
- if(lo<0){flash('Ниже земли уровней нет');return}
+ let lo=up?cur:cur-1;if(lo<0){addBasement();lo=cur-1}const hi=lo+1;
+ 
  lvStore();
- if(!LV[lo].ter[k]){flash('Под этой клеткой нет блока нижнего уровня');return}
+ ensureFloor(LV[lo],x,y);
  if(!LV[hi])LV.push({ter:{},objs:{},chars:[],chunks:new Set()});
  const H2=LV[hi],cx=Math.floor(x/C),cy=Math.floor(y/C);
- if(!H2.chunks.has(ck(cx,cy))){H2.chunks.add(ck(cx,cy));for(let j=0;j<C;j++)for(let i=0;i<C;i++){const kk=ck(cx*C+i,cy*C+j);if(!H2.ter[kk])H2.ter[kk]='stone'}}
+ ensureFloor(H2,x,y);
  if(o&&STAIRS[o.t])stairsUnpair(k,o);
  let r=0,bd=-9;DIRS.forEach((d,i)=>{const v=-d[0]*sn-d[1]*cs;if(v>bd){bd=v;r=i}});
  LV[lo].objs[k]={t:'stairsU',r};H2.objs[k]={t:'stairsD',r};
  lvUi();
- flash('Лестница: '+(lo?'Этаж '+lo:'Земля')+' ⇄ Этаж '+hi+'. Перетащите персонажа на неё или дважды кликните по нему (Enter)');
+ flash('Лестница: '+lvName(lo)+' ⇄ '+lvName(hi)+'. Перетащите персонажа на неё или дважды кликните по нему (Enter)');
 }
+document.getElementById('lvAddB').onclick=()=>{addBasement();lvSwitch(0);flash('Новый подвал: нажмите «+» под блоками верхнего уровня, чтобы построить его');save()};
+let lvDelBT=0;
+document.getElementById('lvDelB').onclick=()=>{
+ if(!GZ){flash('Подвалов нет');return}
+ if(cur!==0){flash('Удалять можно только нижний подвал: переключитесь на него');return}
+ if(Date.now()-lvDelBT>3500){lvDelBT=Date.now();flash('Нажмите ещё раз, чтобы удалить нижний подвал вместе с блоками и персонажами');return}
+ LV.shift();GZ--;undoSt=[];lvLoad(0);for(const k in objs)if(objs[k].t==='stairsD')delete objs[k];lvUi();fit();save();draw();
+};
 document.getElementById('lvUp').onclick=()=>lvMove(1);
 document.getElementById('lvDn').onclick=()=>lvMove(-1);
 function drawSides(){
@@ -833,7 +846,7 @@ function drawSides(){
   for(let j=0;j<C;j++)for(let i=0;i<C;i++){
    const x=cx*C+i,y=cy*C+j;
    for(const[dx,dy]of nb){
-    if(ter[ck(x+dx,y+dy)]||dx*sn+dy*cs<=.001)continue;
+    const nt=ter[ck(x+dx,y+dy)];if(ter[ck(x,y)]==='void'||!(nt==='void'||(!nt&&ZO!==0))||dx*sn+dy*cs<=.001)continue;
     const a=dx?[[x+(dx>0?1:0),y],[x+(dx>0?1:0),y+1]]:[[x,y+(dy>0?1:0)],[x+1,y+(dy>0?1:0)]];
     const f=.62+.38*(0.5-0.5*(dx*cs-dy*sn));
     poly([P(a[0][0],a[0][1],0),P(a[1][0],a[1][1],0),P(a[1][0],a[1][1],-LH),P(a[0][0],a[0][1],-LH)],sh([116,100,84],f));
@@ -842,15 +855,15 @@ function drawSides(){
 }
 function drawLevel(active){
  lt=dimL;wm=0;
- if(ZO>0)drawSides();
+ drawSides();
  const cl=[];
  chunks.forEach(k=>{const[cx,cy]=k.split(',').map(Number);cl.push([cx,cy]);
-  for(let j=0;j<C;j++)for(let i=0;i<C;i++){if(!LM||LM[ck(cx*C+i,cy*C+j)])tile(cx*C+i,cy*C+j)}});
+  for(let j=0;j<C;j++)for(let i=0;i<C;i++){if((!LM||LM[ck(cx*C+i,cy*C+j)])&&ter[ck(cx*C+i,cy*C+j)]!=='void')tile(cx*C+i,cy*C+j)}});
  if(!LM)cl.forEach(([cx,cy])=>poly([P(cx*C,cy*C,0),P(cx*C+C,cy*C,0),P(cx*C+C,cy*C+C,0),P(cx*C,cy*C+C,0)],null,'rgba(0,0,0,.35)'));
  if(active&&hover&&(!LM||LM[ck(hover[0],hover[1])])){const[x,y]=hover;poly([P(x,y,0),P(x+1,y,0),P(x+1,y+1,0),P(x,y+1,0)],'rgba(255,255,255,.22)','rgba(255,255,255,.9)')}
  const L=[];
  for(const k in objs){if(LM&&!LM[k])continue;const[x,y]=k.split(',').map(Number);L.push({d:(x+.5-ox)*sn+(y+.5-oy)*cs,f:()=>ent(objs[k],x,y)})}
- chars.forEach(c=>L.push({d:(c.x+.5-ox)*sn+(c.y+.5-oy)*cs+0.01,f:()=>drawChar(c)}));
+ chars.forEach(c=>{if(LM&&!active&&!LM[ck(c.x,c.y)])return;L.push({d:(c.x+.5-ox)*sn+(c.y+.5-oy)*cs+0.01,f:()=>drawChar(c)})});
  L.sort((a,b)=>a.d-b.d).forEach(e=>e.f());
  lt=1;wm=0;
 }
@@ -870,7 +883,7 @@ function plusList(){
  if(vision&&chars.length)return[];const out=[],seen=new Set();
  chunks.forEach(k=>{const[cx,cy]=k.split(',').map(Number);
   [[1,0],[-1,0],[0,1],[0,-1]].forEach(([a,b])=>{const nk=ck(cx+a,cy+b);if(!chunks.has(nk)&&!seen.has(nk)){seen.add(nk);out.push([cx+a,cy+b])}})});
- if(cur>0&&LV[cur-1])LV[cur-1].chunks.forEach(k=>{if(!chunks.has(k)&&!seen.has(k)){seen.add(k);const[cx,cy]=k.split(',').map(Number);out.push([cx,cy])}});
+ const sup=cur>GZ?LV[cur-1]:(cur<GZ?LV[cur+1]:null);if(sup)sup.chunks.forEach(k=>{if(!chunks.has(k)&&!seen.has(k)){seen.add(k);const[cx,cy]=k.split(',').map(Number);out.push([cx,cy])}});
  return out;
 }
 
@@ -1049,10 +1062,10 @@ function draw(){
  {const sc=chars.find(q=>q.id===sel),v=sc?(sc.vc||DEFVC):null;if(v&&vcIn.value!==v&&document.activeElement!==vcIn)vcIn.value=v}
  const z0=cur;lvStore();
  LM=(vision&&chars.length)?lightMapC():null;if(LM){g.fillStyle='#050508';g.fillRect(0,0,W,H)}
- const order=LM?[z0]:LV.map((_,i)=>i).filter(i=>i<=z0||showAbove);
+ const hasV=Object.values(ter).includes('void'),order=LM?(hasV?LV.map((_,i)=>i).filter(i=>i<=z0):[z0]):LV.map((_,i)=>i).filter(i=>i<=z0||showAbove);
  for(const zi of order){
   if(zi!==z0)lvLoad(zi);
-  ZO=zi*LH;dimL=zi===z0?1:(zi<z0?.62:.85);
+  ZO=(zi-GZ)*LH;dimL=zi===z0?1:(zi<z0?.62:.85);
   drawLevel(zi===z0);
   if(zi!==z0)lvLoad(z0);
  }
@@ -1091,7 +1104,7 @@ function plusAt(e){
 }
 function apply(x,y){
  const k=ck(x,y);
- if(tool==='paint'&&terr)ter[k]=terr;
+ if(tool==='paint'&&terr){ter[k]=terr;if(terr==='void'&&objs[k]){if(STAIRS[objs[k].t])stairsUnpair(k,objs[k]);delete objs[k]}}
  else if(tool==='stairsU'||tool==='stairsD'){if(drag.fresh)stairsPlace(x,y,tool==='stairsU')}
  else if(PLACE.includes(tool)){
   const o=objs[k];if(o&&o.t===tool&&drag.fresh)o.r=o.r?0:1;else if(!o||o.t!==tool){if(o&&STAIRS[o.t])stairsUnpair(k,o);objs[k]={t:tool,r:0}}
@@ -1149,7 +1162,7 @@ cv.addEventListener('pointermove',e=>{
 cv.addEventListener('pointerup',()=>{clearTimeout(lp);
  if(drag&&drag.mode==='tool'&&tool==='move'&&drag.char){
   const ch=drag.char,so=objs[ck(ch.x,ch.y)];
-  if(so&&STAIRS[so.t]){
+  if((so&&STAIRS[so.t])||ter[ck(ch.x,ch.y)]==='void'){
    const now=Date.now();
    if(drag.moved||(lastClk.id===ch.id&&now-lastClk.t<450)){lastClk={id:0,t:0};stairsUse(ch)}
    else lastClk={id:ch.id,t:now};
@@ -1167,12 +1180,12 @@ cv.addEventListener('drop',e=>{
 });
 
 // ---------- storage ----------
-function save(){try{lvStore();localStorage.setItem('dnd-arena3',JSON.stringify({cur,levels:LV.map(L=>({ter:L.ter,objs:L.objs,chars:L.chars,chunks:[...L.chunks]}))}))}catch(e){}lvUi()}
+function save(){try{lvStore();localStorage.setItem('dnd-arena3',JSON.stringify({cur,gz:GZ,levels:LV.map(L=>({ter:L.ter,objs:L.objs,chars:L.chars,chunks:[...L.chunks]}))}))}catch(e){}lvUi()}
 function load(){
  try{
   let s=JSON.parse(localStorage.getItem('dnd-arena3')||'null');
   if(s&&s.levels&&s.levels.length){
-   LV=s.levels.map(L=>({ter:L.ter||{},objs:L.objs||{},chars:L.chars||[],chunks:new Set(L.chunks||[])}));
+   GZ=s.gz||0;LV=s.levels.map(L=>({ter:L.ter||{},objs:L.objs||{},chars:L.chars||[],chunks:new Set(L.chunks||[])}));
    LV.forEach(L=>L.chars.forEach(c=>c.img&&setImg(c)));
    lvLoad(Math.min(s.cur||0,LV.length-1));fit();lvUi();return;
   }
