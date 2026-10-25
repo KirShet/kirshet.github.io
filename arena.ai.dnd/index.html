@@ -454,6 +454,20 @@ function drawFps(){
   }
   return[r*k,gg*k,b*k];
  };
+ const voidCol=(wx,wy,vx,vy,row,e0)=>{
+  let ppx=wx,ppy=wy;
+  for(let j=1;j<=4;j++){
+   const Lw=LV[cur-j];if(!Lw)return[6,6,10];
+   const dp2=(eye+LH*j)*f/row,qx=px+vx*dp2,qy=py+vy*dp2,Ua=LV[cur-j+1].ter;
+   for(let s2=1;s2<=6;s2++){const t=s2/7,sx=ppx+(qx-ppx)*t,sy=ppy+(qy-ppy)*t,u=Ua[ck(Math.floor(sx),Math.floor(sy))];if(u&&u!=='void')return shade([116,100,84],e0,Math.hypot(sx-px,sy-py),.7)}
+   const t2=Lw.ter[ck(Math.floor(qx),Math.floor(qy))];
+   if(!t2)return[6,6,10];
+   if(t2==='void'){ppx=qx;ppy=qy;continue}
+   const T=TER[t2],hh=hs(Math.floor(qx*9),Math.floor(qy*9)),n=1+((hh&7)/7-.5)*.16;
+   return shade([T.c[0]*n,T.c[1]*n,T.c[2]*n],e0,dp2,.8);
+  }
+  return[0,0,0];
+ };
  const img=fpx.createImageData(rw,rh),D=img.data;
  for(let y=0;y<rh;y++){
   const row=y-hz;
@@ -462,7 +476,7 @@ function drawFps(){
    if(row<=0){const t=y/hz;col=LMf?[6+8*t,6+8*t,14+12*t]:[90+110*t,150+70*t,220+20*t]}
    else{
     const dp=eye*f/row,k=((x+.5)/rw*2-1)*tf,wx=px+(dx+rx*k)*dp,wy=py+(dy+ry*k)*dp,cx=Math.floor(wx),cy=Math.floor(wy),tn=ter[ck(cx,cy)];
-    if(!tn)col=[6,6,10];
+    if(!tn)col=[6,6,10];else if(tn==='void')col=voidCol(wx,wy,dx+rx*k,dy+ry*k,row,lt2(wx,wy));
     else{
      const T=TER[tn],fx=wx-cx,fy=wy-cy,hh=hs(Math.floor(wx*9),Math.floor(wy*9)),n=1+((hh&7)/7-.5)*.16+(WAV[tn]?.09*Math.sin(WT*2.4+wx*5+wy*3.3):0),ed=(fx<.04||fx>.96||fy<.04||fy>.96)?.82:1;
      let base=T.c;
