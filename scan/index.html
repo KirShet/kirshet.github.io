@@ -1,36 +1,45 @@
 <!DOCTYPE html>
 <html lang="ru"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Сканворд</title>
 <style>
-:root{color-scheme:dark;--bg:#0b0b0d;--panel:#16161a;--tx:#eee;--mut:#9a9aa5;--cell:#fff;--ink:#111;--sel:#ffe27a;--act:#cfe3ff;--ok:#b9f0c4;--ac:#6ea8ff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media(prefers-color-scheme:light){:root:not([data-theme="dark"]){color-scheme:light;--bg:#f3f3f6;--panel:#fff;--tx:#18181c;--mut:#62626c;--ac:#2f6fe0}}
+:root{color-scheme:dark;--bg:#0b0b0d;--panel:#16161a;--tx:#eee;--mut:#9a9aa5;--cell:#fff;--ink:#111;--sel:#ffe27a;--act:#cfe3ff;--ok:#b9f0c4;--ac:#6ea8ff}
+@media(prefers-color-scheme:light){:root{color-scheme:light;--bg:#f3f3f6;--panel:#fff;--tx:#18181c;--mut:#62626c;--ac:#2f6fe0}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
 h1{font-size:1.3rem;margin:0 0 4px}
 main{max-width:1100px;margin:0 auto;padding:16px;display:grid;gap:16px;grid-template-columns:minmax(0,1fr) 340px}
 @media(max-width:860px){main{grid-template-columns:1fr}}
 .panel{background:var(--panel);border-radius:12px;padding:14px}
-.board{overflow-x:auto;background:#000;border-radius:12px;padding:12px}
+.board{overflow:auto;background:#000;border-radius:12px;padding:12px}
 #grid{display:grid;gap:2px;width:max-content;margin:auto}
 .cell{position:relative;width:34px;height:34px;background:var(--cell);border-radius:2px}
 .cell input{width:100%;height:100%;border:0;background:transparent;text-align:center;font:600 18px system-ui,sans-serif;color:var(--ink);text-transform:uppercase;padding:0;caret-color:transparent;outline:none;cursor:pointer}
-.cell.w{background:var(--act)}.cell.cur{background:var(--sel)}.cell.ok{background:var(--ok)}
+.cell.w{background:var(--act)}.cell.cur{background:var(--sel)}.cell.ok{background:var(--ok)}.cell.bad{background:#f5a3a3}
 .num{position:absolute;top:0;left:2px;font:10px system-ui,sans-serif;color:#c33;pointer-events:none}
-.bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
 button{background:var(--ac);color:#fff;border:0;border-radius:8px;padding:8px 14px;font:inherit;cursor:pointer}
 button.g{background:transparent;color:var(--tx);border:1px solid var(--mut)}
+input.seed{width:110px;padding:7px 8px;border-radius:8px;border:1px solid var(--mut);background:transparent;color:var(--tx);font:inherit}
 .q{font-size:1.05rem;margin:8px 0}
 .link{color:var(--mut);font-size:.9rem;border-left:3px solid var(--ac);padding-left:10px;margin:8px 0}
 ol{list-style:none;margin:0;padding:0;max-height:300px;overflow:auto}
 li{padding:6px 8px;border-radius:8px;cursor:pointer;display:flex;gap:8px;font-size:.9rem}
-li:hover{background:rgba(120,120,140,.15)}li.on{outline:2px solid var(--ac)}li.done{color:#6fd28a}
+li:hover{background:rgba(120,120,140,.15)}li.on{outline:2px solid var(--ac)}li.done{color:#6fd28a}li.off{opacity:.45}
 li b{min-width:44px}
 .prog{color:var(--mut);font-size:.9rem}
 </style></head><body>
 <main>
 <section>
-<div class="panel" style="margin-bottom:16px"><h1>Сканворд: цепочка слов</h1><div class="prog" id="prog"></div></div>
+<div class="panel" style="margin-bottom:16px">
+ <h1>Сканворд: цепочка слов</h1>
+ <div class="prog" id="prog"></div>
+ <div class="bar">
+  <button id="gen">Создать сканворд с нуля</button>
+  <label class="prog">зерно: <input class="seed" id="seed" inputmode="numeric"></label>
+  <span class="prog" id="info"></span>
+ </div>
+</div>
 <div class="board"><div id="grid"></div></div>
 <div class="bar"><button id="chk" class="g">Проверить всё</button><button id="rev" class="g">Показать слово</button><button id="clr" class="g">Очистить</button></div>
 </section>
@@ -44,102 +53,149 @@ li b{min-width:44px}
 <div class="panel" style="margin-top:16px"><ol id="list"></ol></div>
 </aside>
 </main>
+
+<!-- Данные лежат в отдельных файлах рядом с index.html -->
+<script src="answers.js"></script>
+<script src="questions.js"></script>
 <script>
-const D=[
-["БРЮСОВ","Основоположник русского символизма, автор романа «Огненный ангел».",""],
-["СИМВОЛИЗМ","Литературное течение, которое возглавил автор предыдущего ответа.","Брюсов стоял у истоков этого течения."],
-["БЛОК","Главный поэт этого течения, автор поэмы «Двенадцать».","Самый знаменитый поэт течения «{p}»."],
-["КАББАЛА","Мистическое учение иудаизма, к тайнам которого тянулись символисты.","Вслед за поэтом — к его эпохе мистики и тайных учений."],
-["ПЕРЕВОРОТ","Резкая смена власти; «дворцовый …» 1762 года посадил на трон императрицу.","От тайного знания — к тайному заговору."],
-["ЕКАТЕРИНА","Императрица, взошедшая на престол в результате этого переворота.","Это она пришла к власти благодаря «{p}»."],
-["МООР","Карл …, благородный разбойник из драмы Шиллера «Разбойники».","От императрицы-правительницы — к бунтарю против любой власти."],
-["АНДРОПОВ","Генеральный секретарь ЦК КПСС в 1982–1984 годах, бывший глава КГБ.","От вымышленного бунтаря — к реальной власти."],
-["ЧЕРНЕНКО","Преемник предыдущего на посту Генсека, правил чуть больше года.","Он сменил на посту «{p}»."],
-["ОММЕТР","Прибор для измерения электрического сопротивления.","От политики — к технике."],
-["ДОПУСК","Разрешённое отклонение размера или показателя при измерении.","Измеряя, всегда учитывают его: ведь «{p}» работает с погрешностью."],
-["СОМ","Крупная усатая пресноводная рыба; также денежная единица Киргизии.","Ловят без «{p}», зато с удочкой; а слово отличается от «ом» одной буквой."],
-["АПЕЛЬСИН","Оранжевый цитрусовый плод.","Рыбалка окончена — пора перекусить."]];
-// layout
-const cells=new Map(),words=[];
-const key=(r,c)=>r+","+c;
-function fits(w,r,c,d){let x=0;const dr=d?1:0,dc=d?0:1;
- const bf=cells.get(key(r-dr,c-dc)),af=cells.get(key(r+dr*w.length,c+dc*w.length));
- if(bf||af)return -1;
- for(let i=0;i<w.length;i++){const rr=r+dr*i,cc=c+dc*i,e=cells.get(key(rr,cc));
-  if(e){if(e.l!==w[i]||e.d.has(d))return -1;x++}
-  else{if(cells.get(key(rr+dc,cc+dr))||cells.get(key(rr-dc,cc-dr)))return -1}}
- return x}
-function put(i,w,r,c,d){const dr=d?1:0,dc=d?0:1;
- for(let k=0;k<w.length;k++){const kk=key(r+dr*k,c+dc*k);let e=cells.get(kk);if(!e){e={l:w[k],d:new Set(),ws:[]};cells.set(kk,e)}e.d.add(d);e.ws.push(i)}
- words[i]={w,r,c,d}}
-const order=D.map((x,i)=>i).sort((a,b)=>D[b][0].length-D[a][0].length);
-order.forEach((i,n)=>{const w=D[i][0];
- if(!n){put(i,w,0,0,0);return}
- let best=null,bs=0;
- for(const [k,e] of cells){const [r0,c0]=k.split(",").map(Number);
-  for(let j=0;j<w.length;j++)if(w[j]===e.l)for(const d of[0,1]){
-   if(e.d.has(d))continue;
-   const r=d?r0-j:r0,c=d?c0:c0-j,s=fits(w,r,c,d);
-   if(s>bs){bs=s;best={r,c,d}}}}
- if(!best){const mr=Math.max(...[...cells.keys()].map(k=>+k.split(",")[0]));best={r:mr+2,c:0,d:0}}
- put(i,w,best.r,best.c,best.d)});
-let minR=1e9,minC=1e9,maxR=-1e9,maxC=-1e9;
-for(const k of cells.keys()){const[r,c]=k.split(",").map(Number);minR=Math.min(minR,r);minC=Math.min(minC,c);maxR=Math.max(maxR,r);maxC=Math.max(maxC,c)}
-const grid=document.getElementById("grid");
-grid.style.gridTemplateColumns=`repeat(${maxC-minC+1},34px)`;
-const starts=[...new Set(words.map(x=>key(x.r,x.c)))].map(k=>k.split(",").map(Number)).sort((a,b)=>a[0]-b[0]||a[1]-b[1]);
-const numOf=k=>starts.findIndex(s=>key(s[0],s[1])===k)+1;
-words.forEach(x=>x.n=numOf(key(x.r,x.c)));
-const els=new Map();
-for(let r=minR;r<=maxR;r++)for(let c=minC;c<=maxC;c++){
- const e=cells.get(key(r,c));
- if(!e){grid.appendChild(Object.assign(document.createElement("div"),{style:"width:34px;height:34px"}));continue}
- const div=document.createElement("div");div.className="cell";
- const inp=document.createElement("input");inp.maxLength=2;inp.autocomplete="off";inp.setAttribute("aria-label","Клетка");
- div.appendChild(inp);
- const w0=words.findIndex(x=>x.r===r&&x.c===c);
- if(w0>=0){const s=document.createElement("span");s.className="num";s.textContent=numOf(key(r,c));div.appendChild(s)}
- grid.appendChild(div);els.set(key(r,c),{div,inp,r,c,e});
- inp.addEventListener("focus",()=>pick(r,c));
- inp.addEventListener("click",()=>pick(r,c,true));
- inp.addEventListener("input",()=>{const v=inp.value.toUpperCase().replace(/Ё/g,"Е").replace(/[^А-Я]/g,"");inp.value=v.slice(-1);if(v)step(1);check()});
- inp.addEventListener("keydown",ev=>{
-  if(ev.key==="Backspace"&&!inp.value){step(-1);ev.preventDefault()}
-  else if(ev.key==="ArrowRight"||ev.key==="ArrowDown"){step(1);ev.preventDefault()}
-  else if(ev.key==="ArrowLeft"||ev.key==="ArrowUp"){step(-1);ev.preventDefault()}
-  else if(ev.key==="Enter")go(cur+1)});
+"use strict";
+const N = ANSWERS.length;
+if (QUESTIONS.length !== N) alert("Число вопросов (" + QUESTIONS.length + ") не совпадает с числом ответов (" + N + ")");
+const $ = id => document.getElementById(id);
+const key = (r, c) => r + "," + c;
+
+/* ---------- генератор сетки ---------- */
+function mulberry(seed) {
+  return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
 }
-let cur=0,pos=[0,0],solved=new Set();
-const $=id=>document.getElementById(id);
-function cellsOf(i){const x=words[i],a=[];for(let k=0;k<x.w.length;k++)a.push(x.d?[x.r+k,x.c]:[x.r,x.c+k]);return a}
-function pick(r,c,tog){const e=cells.get(key(r,c));
- if(!e.ws.includes(cur))cur=e.ws[0];
- else if(tog&&e.ws.length>1&&pos[0]===r&&pos[1]===c)cur=e.ws.find(i=>i!==cur);
- pos=[r,c];paint()}
-function step(d){const a=cellsOf(cur);let i=a.findIndex(p=>p[0]===pos[0]&&p[1]===pos[1])+d;
- if(i<0||i>=a.length)return;pos=a[i];els.get(key(pos[0],pos[1])).inp.focus();paint()}
-function go(i){cur=(i+D.length)%D.length;pos=cellsOf(cur)[0];els.get(key(pos[0],pos[1])).inp.focus();paint()}
-function word(i){return cellsOf(i).map(p=>els.get(key(p[0],p[1])).inp.value||"").join("")}
-function check(){solved.clear();D.forEach((d,i)=>{if(word(i)===d[0])solved.add(i)});paint()}
-function paint(){
- els.forEach(o=>o.div.className="cell");
- solved.forEach(i=>cellsOf(i).forEach(p=>els.get(key(p[0],p[1])).div.classList.add("ok")));
- cellsOf(cur).forEach(p=>{const d=els.get(key(p[0],p[1])).div;if(!d.classList.contains("ok"))d.classList.add("w")});
- const o=els.get(key(pos[0],pos[1]));if(o&&!o.div.classList.contains("ok"))o.div.classList.add("cur");
- const x=words[cur],pv=(cur+D.length-1)%D.length;
- $("pos").textContent=`Вопрос ${cur+1} из ${D.length} · №${x.n} ${x.d?"↓ по вертикали":"→ по горизонтали"} · ${x.w.length} букв`;
- $("q").textContent=D[cur][1];
- const p=solved.has(pv)?D[pv][0][0]+D[pv][0].slice(1).toLowerCase():"…";
- $("lk").textContent=cur===0?"Начало цепочки. Каждый следующий вопрос связан с ответом на предыдущий.":"🔗 Связь с вопросом "+(pv+1)+(solved.has(pv)?" («"+p+"»)":"")+": "+D[cur][2].replace("{p}",p);
- $("prog").textContent=`Решено: ${solved.size} из ${D.length}`+(solved.size===D.length?" 🎉 Сканворд готов!":"");
- $("list").innerHTML="";
- D.forEach((d,i)=>{const li=document.createElement("li");li.className=(i===cur?"on ":"")+(solved.has(i)?"done":"");
-  li.innerHTML=`<b>${words[i].n}${words[i].d?"↓":"→"}</b><span></span>`;li.lastChild.textContent=(i?"↳ ":"")+d[1];
-  li.onclick=()=>go(i);$("list").appendChild(li)})}
-$("next").onclick=()=>go(cur+1);$("prev").onclick=()=>go(cur-1);
-$("chk").onclick=()=>{check();els.forEach(o=>{if(o.inp.value&&o.inp.value!==o.e.l){o.div.style.background="#f5a3a3"}else o.div.style.background=""})};
-$("rev").onclick=()=>{cellsOf(cur).forEach((p,k)=>els.get(key(p[0],p[1])).inp.value=words[cur].w[k]);check()};
-$("clr").onclick=()=>{els.forEach(o=>{o.inp.value="";o.div.style.background=""});check()};
-document.addEventListener("input",()=>els.forEach(o=>o.div.style.background=""));
-go(0);
-</script></body></html>
+function fits(cells, w, r, c, d) {
+  const dr = d ? 1 : 0, dc = d ? 0 : 1; let x = 0;
+  if (cells.get(key(r - dr, c - dc)) || cells.get(key(r + dr * w.length, c + dc * w.length))) return -1;
+  for (let i = 0; i < w.length; i++) {
+    const rr = r + dr * i, cc = c + dc * i, e = cells.get(key(rr, cc));
+    if (e) { if (e.l !== w[i] || e.d.has(d)) return -1; x++; }
+    else if (cells.get(key(rr + dc, cc + dr)) || cells.get(key(rr - dc, cc - dr))) return -1;
+  }
+  return x;
+}
+function put(cells, words, i, r, c, d) {
+  const w = ANSWERS[i], dr = d ? 1 : 0, dc = d ? 0 : 1;
+  for (let k = 0; k < w.length; k++) {
+    const kk = key(r + dr * k, c + dc * k); let e = cells.get(kk);
+    if (!e) { e = { l: w[k], d: new Set(), ws: [] }; cells.set(kk, e); }
+    e.d.add(d); e.ws.push(i);
+  }
+  words[i] = { w, r, c, d };
+}
+function attempt(rand) {
+  const cells = new Map(), words = new Array(N).fill(null);
+  const order = [...Array(N).keys()].sort((a, b) => ANSWERS[b].length - ANSWERS[a].length + (rand() - .5) * 6);
+  let miss = 0;
+  order.forEach((i, n) => {
+    const w = ANSWERS[i];
+    if (!n) { put(cells, words, i, 0, 0, 0); return; }
+    let best = null, bs = 0;
+    for (const [k, e] of cells) {
+      const [r0, c0] = k.split(",").map(Number);
+      for (let j = 0; j < w.length; j++) if (w[j] === e.l) for (const d of [0, 1]) {
+        if (e.d.has(d)) continue;
+        const r = d ? r0 - j : r0, c = d ? c0 : c0 - j, s = fits(cells, w, r, c, d);
+        if (s > bs || (s === bs && s > 0 && rand() < .25)) { bs = s; best = { r, c, d }; }
+      }
+    }
+    if (best) put(cells, words, i, best.r, best.c, best.d); else miss++;
+  });
+  let r1 = 1e9, c1 = 1e9, r2 = -1e9, c2 = -1e9;
+  for (const k of cells.keys()) { const [r, c] = k.split(",").map(Number);
+    r1 = Math.min(r1, r); c1 = Math.min(c1, c); r2 = Math.max(r2, r); c2 = Math.max(c2, c); }
+  const h = r2 - r1 + 1, wd = c2 - c1 + 1;
+  return { cells, words, miss, r1, c1, r2, c2, score: miss * 1e6 + h * wd + Math.abs(h - wd) * 4 };
+}
+function generate(seed) {
+  const rand = mulberry(seed), t0 = performance.now(); let best = null, n = 0;
+  while (performance.now() - t0 < 1500 && n < 400) { const a = attempt(rand); n++; if (!best || a.score < best.score) best = a; }
+  best.tries = n; return best;
+}
+
+/* ---------- состояние и отрисовка ---------- */
+let L, els, cur, pos, solved;
+const cellsOf = i => { const x = L.words[i], a = []; for (let k = 0; k < x.w.length; k++) a.push(x.d ? [x.r + k, x.c] : [x.r, x.c + k]); return a; };
+const placed = () => [...Array(N).keys()].filter(i => L.words[i]);
+
+function build(seed) {
+  L = generate(seed); $("seed").value = seed;
+  $("info").textContent = `${placed().length} из ${N} слов в сетке · ${L.r2 - L.r1 + 1}×${L.c2 - L.c1 + 1} · вариантов: ${L.tries}`;
+  const grid = $("grid"); grid.innerHTML = ""; grid.style.gridTemplateColumns = `repeat(${L.c2 - L.c1 + 1},34px)`;
+  const starts = [...new Set(placed().map(i => key(L.words[i].r, L.words[i].c)))].map(k => k.split(",").map(Number)).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  const numOf = k => starts.findIndex(s => key(s[0], s[1]) === k) + 1;
+  placed().forEach(i => L.words[i].n = numOf(key(L.words[i].r, L.words[i].c)));
+  els = new Map(); solved = new Set();
+  for (let r = L.r1; r <= L.r2; r++) for (let c = L.c1; c <= L.c2; c++) {
+    const e = L.cells.get(key(r, c));
+    if (!e) { grid.appendChild(Object.assign(document.createElement("div"), { style: "width:34px;height:34px" })); continue; }
+    const div = document.createElement("div"), inp = document.createElement("input");
+    inp.maxLength = 2; inp.autocomplete = "off"; inp.setAttribute("aria-label", "Клетка"); div.appendChild(inp);
+    if (placed().some(i => L.words[i].r === r && L.words[i].c === c)) {
+      const s = document.createElement("span"); s.className = "num"; s.textContent = numOf(key(r, c)); div.appendChild(s);
+    }
+    grid.appendChild(div); els.set(key(r, c), { div, inp, e });
+    inp.addEventListener("focus", () => pick(r, c));
+    inp.addEventListener("click", () => pick(r, c, true));
+    inp.addEventListener("input", () => {
+      const v = inp.value.toUpperCase().replace(/Ё/g, "Е").replace(/[^А-Я]/g, "");
+      inp.value = v.slice(-1); els.forEach(o => o.div.classList.remove("bad")); if (v) step(1); check();
+    });
+    inp.addEventListener("keydown", ev => {
+      if (ev.key === "Backspace" && !inp.value) { step(-1); ev.preventDefault(); }
+      else if (ev.key === "ArrowRight" || ev.key === "ArrowDown") { step(1); ev.preventDefault(); }
+      else if (ev.key === "ArrowLeft" || ev.key === "ArrowUp") { step(-1); ev.preventDefault(); }
+      else if (ev.key === "Enter") go(next(cur, 1));
+    });
+  }
+  const first = placed()[0]; cur = first; pos = cellsOf(first)[0]; paint();
+}
+function next(i, d) { const p = placed(); const k = p.indexOf(i); return p[(k + d + p.length) % p.length]; }
+function pick(r, c, tog) {
+  const e = L.cells.get(key(r, c));
+  if (!e.ws.includes(cur)) cur = e.ws[0];
+  else if (tog && e.ws.length > 1 && pos[0] === r && pos[1] === c) cur = e.ws.find(i => i !== cur);
+  pos = [r, c]; paint();
+}
+function step(d) {
+  const a = cellsOf(cur); const i = a.findIndex(p => p[0] === pos[0] && p[1] === pos[1]) + d;
+  if (i < 0 || i >= a.length) return; pos = a[i]; els.get(key(pos[0], pos[1])).inp.focus(); paint();
+}
+function go(i) { cur = i; pos = cellsOf(cur)[0]; els.get(key(pos[0], pos[1])).inp.focus(); paint(); }
+const word = i => cellsOf(i).map(p => els.get(key(p[0], p[1])).inp.value || "").join("");
+function check() { solved.clear(); placed().forEach(i => { if (word(i) === ANSWERS[i]) solved.add(i); }); paint(); }
+const cap = s => s[0] + s.slice(1).toLowerCase();
+function paint() {
+  els.forEach(o => { o.div.classList.remove("w", "cur", "ok"); });
+  solved.forEach(i => cellsOf(i).forEach(p => els.get(key(p[0], p[1])).div.classList.add("ok")));
+  cellsOf(cur).forEach(p => { const d = els.get(key(p[0], p[1])).div; if (!d.classList.contains("ok")) d.classList.add("w"); });
+  const o = els.get(key(pos[0], pos[1])); if (o && !o.div.classList.contains("ok")) o.div.classList.add("cur");
+  const x = L.words[cur], pv = (cur + N - 1) % N, pOk = solved.has(pv), p = pOk ? cap(ANSWERS[pv]) : "…";
+  $("pos").textContent = `Вопрос ${cur + 1} из ${N} · №${x.n} ${x.d ? "↓ по вертикали" : "→ по горизонтали"} · ${x.w.length} букв`;
+  $("q").textContent = QUESTIONS[cur][0];
+  $("lk").textContent = cur === 0 ? "Начало цепочки. Каждый следующий вопрос связан с ответом на предыдущий."
+    : "🔗 Связь с вопросом " + (pv + 1) + (pOk ? " («" + p + "»)" : "") + ": " + QUESTIONS[cur][1].replace("{p}", p);
+  $("prog").textContent = `Решено: ${solved.size} из ${placed().length}` + (solved.size === placed().length ? " 🎉 Сканворд готов!" : "");
+  const ol = $("list"); ol.innerHTML = "";
+  for (let i = 0; i < N; i++) {
+    const li = document.createElement("li"), w = L.words[i];
+    li.className = (i === cur ? "on " : "") + (solved.has(i) ? "done " : "") + (w ? "" : "off");
+    li.innerHTML = `<b>${w ? w.n + (w.d ? "↓" : "→") : "—"}</b><span></span>`;
+    li.lastChild.textContent = (i ? "↳ " : "") + QUESTIONS[i][0];
+    if (w) li.onclick = () => go(i); ol.appendChild(li);
+  }
+}
+$("next").onclick = () => go(next(cur, 1)); $("prev").onclick = () => go(next(cur, -1));
+$("gen").onclick = () => build(Math.floor(Math.random() * 1e6));
+$("seed").addEventListener("change", () => build(parseInt($("seed").value, 10) || 1));
+$("chk").onclick = () => { check(); els.forEach(o => { if (o.inp.value && o.inp.value !== o.e.l) o.div.classList.add("bad"); }); };
+$("rev").onclick = () => { cellsOf(cur).forEach((p, k) => els.get(key(p[0], p[1])).inp.value = ANSWERS[cur][k]); check(); };
+$("clr").onclick = () => { els.forEach(o => { o.inp.value = ""; o.div.classList.remove("bad"); }); check(); };
+build(Math.floor(Math.random() * 1e6));
+</script>
+</body></html>
