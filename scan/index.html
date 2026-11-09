@@ -135,6 +135,7 @@ function build(seed) {
     const e = L.cells.get(key(r, c));
     if (!e) { grid.appendChild(Object.assign(document.createElement("div"), { style: "width:34px;height:34px" })); continue; }
     const div = document.createElement("div"), inp = document.createElement("input");
+    div.className = "cell";
     inp.maxLength = 2; inp.autocomplete = "off"; inp.setAttribute("aria-label", "Клетка"); div.appendChild(inp);
     if (placed().some(i => L.words[i].r === r && L.words[i].c === c)) {
       const s = document.createElement("span"); s.className = "num"; s.textContent = numOf(key(r, c)); div.appendChild(s);
