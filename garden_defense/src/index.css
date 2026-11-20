@@ -1,0 +1,355 @@
+@import "tailwindcss";
+@import "@fontsource/lilita-one/latin-400.css";
+@import "@fontsource/russo-one/400.css";
+@import "@fontsource-variable/nunito";
+@import "./menu.css";
+@import "./rover.css";
+
+:root {
+  --font-display: 'Russo One', system-ui, sans-serif;
+  --font-body: 'Nunito Variable', system-ui, sans-serif;
+}
+
+html, body {
+  margin: 0;
+  background: #0d1f10;
+  font-family: var(--font-body);
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.font-display { font-family: var(--font-display); }
+
+/* ============ анимации спрайтов (SVG sub-groups) ============ */
+
+@keyframes sway {
+  0%, 100% { transform: rotate(-3.5deg); }
+  50% { transform: rotate(3.5deg); }
+}
+.anim-sway { animation: sway 3.2s ease-in-out infinite; transform-box: view-box; }
+
+@keyframes idleBob {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  50% { transform: translateY(-1.5px) scale(1.01, 0.99); }
+}
+.anim-idle { animation: idleBob 2.4s ease-in-out infinite; transform-box: view-box; }
+
+@keyframes leafL {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-7deg); }
+}
+.anim-leaf-l { animation: leafL 2.8s ease-in-out infinite; transform-box: fill-box; transform-origin: right bottom; }
+
+@keyframes leafR {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(7deg); }
+}
+.anim-leaf-r { animation: leafR 3.1s ease-in-out infinite; transform-box: fill-box; transform-origin: left bottom; }
+
+@keyframes nutBreathe {
+  0%, 100% { transform: scale(1, 1); }
+  50% { transform: scale(1.015, 0.985); }
+}
+.anim-nut { animation: nutBreathe 3.6s ease-in-out infinite; transform-box: view-box; }
+
+@keyframes pulseFast {
+  0%, 100% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.08); filter: brightness(1.35); }
+}
+.anim-pulse-fast { animation: pulseFast 0.28s ease-in-out infinite; transform-box: fill-box; transform-origin: center bottom; }
+
+@keyframes spark {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.3; transform: scale(0.6); }
+}
+.anim-spark { animation: spark 0.18s linear infinite; transform-box: fill-box; transform-origin: center; }
+
+/* ---- зомби (вид спереди) ---- */
+
+@keyframes zbob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+.anim-zbob { animation: zbob 0.45s ease-in-out infinite; transform-box: view-box; }
+
+@keyframes stepA {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+.anim-step-a { animation: stepA 0.9s ease-in-out infinite; transform-box: view-box; }
+.anim-step-b { animation: stepA 0.9s ease-in-out -0.45s infinite; transform-box: view-box; }
+
+@keyframes armSwingL {
+  0%, 100% { transform: rotate(-6deg); }
+  50% { transform: rotate(5deg); }
+}
+@keyframes armSwingR {
+  0%, 100% { transform: rotate(6deg); }
+  50% { transform: rotate(-5deg); }
+}
+.anim-arm-l { animation: armSwingL 0.9s ease-in-out infinite; transform-box: view-box; }
+.anim-arm-r { animation: armSwingR 0.9s ease-in-out -0.45s infinite; transform-box: view-box; }
+
+@keyframes armEatL {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-20deg) translateY(2px); }
+}
+@keyframes armEatR {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(20deg) translateY(2px); }
+}
+.anim-arm-eat-l { animation: armEatL 0.45s ease-in-out infinite; transform-box: view-box; }
+.anim-arm-eat-r { animation: armEatR 0.45s ease-in-out infinite; transform-box: view-box; }
+
+@keyframes jawOpen {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(0.45); }
+}
+.anim-jaw { animation: jawOpen 0.45s ease-in-out infinite; transform-box: view-box; }
+
+@keyframes zfall {
+  0% { transform: scale(1, 1); opacity: 1; }
+  45% { transform: scale(1.08, 0.72); opacity: 1; }
+  100% { transform: scale(1.14, 0.1); opacity: 0; }
+}
+.anim-zfall { animation: zfall 0.9s ease-in forwards; transform-box: view-box; transform-origin: 60px 146px; }
+
+/* ---- зомби (старый боковой вариант, оставлен для совместимости) ---- */
+
+@keyframes zwalk {
+  0%, 100% { transform: rotate(-2deg) translateY(0); }
+  50% { transform: rotate(2deg) translateY(-2px); }
+}
+.anim-zwalk { animation: zwalk 0.9s ease-in-out infinite; transform-box: view-box; }
+
+@keyframes legL {
+  0%, 100% { transform: rotate(9deg); }
+  50% { transform: rotate(-9deg); }
+}
+.anim-leg-l { animation: legL 0.9s ease-in-out infinite; transform-box: view-box; }
+
+@keyframes legR {
+  0%, 100% { transform: rotate(-9deg); }
+  50% { transform: rotate(9deg); }
+}
+.anim-leg-r { animation: legR 0.9s ease-in-out infinite; transform-box: view-box; }
+
+@keyframes armWave {
+  0%, 100% { transform: rotate(-4deg); }
+  50% { transform: rotate(6deg); }
+}
+.anim-arm { animation: armWave 1.1s ease-in-out infinite; transform-box: view-box; }
+
+@keyframes chomp {
+  0%, 100% { transform: rotate(0deg); }
+  30% { transform: rotate(7deg) translateY(2px); }
+  60% { transform: rotate(-3deg); }
+}
+.anim-chomp { animation: chomp 0.45s ease-in-out infinite; transform-box: view-box; }
+
+@keyframes chompArm {
+  0%, 100% { transform: rotate(0deg); }
+  40% { transform: rotate(-14deg) translateY(3px); }
+}
+.anim-chomp-arm { animation: chompArm 0.45s ease-in-out infinite; transform-box: view-box; }
+
+@keyframes zdie {
+  0% { transform: rotate(0deg) translateY(0); opacity: 1; }
+  60% { transform: rotate(-80deg) translateY(6px); opacity: 1; }
+  100% { transform: rotate(-86deg) translateY(10px); opacity: 0; }
+}
+.anim-zdie { animation: zdie 0.9s ease-in forwards; transform-box: view-box; transform-origin: 50% 96%; }
+
+@keyframes raysSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.anim-rays { animation: raysSpin 14s linear infinite; transform-box: view-box; }
+
+@keyframes wheelSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+.anim-wheel { animation: wheelSpin 0.3s linear infinite; transform-box: view-box; }
+
+@keyframes mowerShake {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-1.5px) rotate(-1deg); }
+  75% { transform: translateY(1px) rotate(1deg); }
+}
+.anim-mower { animation: mowerShake 0.12s linear infinite; }
+
+/* ---- появление растения ---- */
+
+@keyframes plantPop {
+  0% { transform: scale(0.2) translateY(10px); }
+  60% { transform: scale(1.12) translateY(-3px); }
+  100% { transform: scale(1) translateY(0); }
+}
+.anim-pop { animation: plantPop 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+
+/* ---- вспышка урона ---- */
+
+.flash-hit { filter: brightness(2.4) saturate(0.4); }
+
+/* ---- UI анимации ---- */
+
+@keyframes bannerIn {
+  0% { transform: scale(0.6); opacity: 0; }
+  15% { transform: scale(1.06); opacity: 1; }
+  25% { transform: scale(1); }
+  80% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.04); opacity: 0; }
+}
+.anim-banner { animation: bannerIn 3s ease both; }
+
+@keyframes readyPulse {
+  0% { transform: scale(0.5); opacity: 0; }
+  30% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.anim-ready { animation: readyPulse 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+
+@keyframes floatUp {
+  0% { transform: translateY(16px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+.anim-float-up { animation: floatUp 0.5s ease both; }
+
+@keyframes blinkSoft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+.anim-blink { animation: blinkSoft 0.5s linear infinite; }
+
+@keyframes sunPulse {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(255, 213, 74, 0.9)); }
+  50% { filter: drop-shadow(0 0 16px rgba(255, 213, 74, 1)); }
+}
+.anim-sun-glow { animation: sunPulse 1.6s ease-in-out infinite; }
+
+@keyframes shakeStage {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-7px, 4px); }
+  40% { transform: translate(6px, -5px); }
+  60% { transform: translate(-5px, -3px); }
+  80% { transform: translate(4px, 3px); }
+}
+.anim-shake { animation: shakeStage 0.4s linear infinite; }
+
+@keyframes titleFloat {
+  0%, 100% { transform: translateY(0) rotate(-1.2deg); }
+  50% { transform: translateY(-10px) rotate(1.2deg); }
+}
+.anim-title { animation: titleFloat 5s ease-in-out infinite; }
+
+@keyframes cloudDrift {
+  from { transform: translateX(-10%); }
+  to { transform: translateX(110%); }
+}
+.anim-cloud { animation: cloudDrift 60s linear infinite; }
+
+/* курсор-рука для интерактива */
+.cursor-hand { cursor: pointer; }
+
+button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+button:focus-visible { outline: 3px solid #f5dc8c; outline-offset: 4px; }
+.arena-world { background: linear-gradient(90deg, #7288ac 50%, #784c42 50%); }
+.arena-scenery { position: absolute; top: 0; left: 0; width: 100%; height: auto; pointer-events: none; }
+.arena-ground, .arena-cell-layer { position: absolute; inset: 0; width: 100%; height: 100%; }
+.arena-ground { pointer-events: none; }
+.arena-hud {
+  border-color: #757988;
+  background: linear-gradient(180deg, #ffffff12, #11132125 40%, #07060e56),
+    linear-gradient(108deg, #2e3a50, #272735 53%, #422f32);
+}
+.arena-hud-top { box-shadow: inset 0 -1px #0e1323, 0 4px 16px #10101e77; }
+.arena-hud-bottom { box-shadow: inset 0 1px #111421, 0 -4px 14px #10101e77; }
+.arena-flake { animation: arena-snowfall 10s linear infinite; }
+.arena-leaf { animation: arena-leaf-drift 12s linear infinite; }
+@keyframes arena-snowfall {
+  from { opacity: 0; transform: translate(-18px, -87px); }
+  19%, 77% { opacity: .76; }
+  to { opacity: 0; transform: translate(26px, 112px); }
+}
+@keyframes arena-leaf-drift {
+  from { opacity: 0; transform: translate(18px, -67px) rotate(-25deg) scaleX(.46); }
+  20%, 77% { opacity: .8; }
+  50% { transform: translate(-6px, 12px) rotate(90deg) scaleX(1); }
+  to { opacity: 0; transform: translate(-51px, 115px) rotate(212deg) scaleX(.55); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .arena-weather { display: none; }
+}
+.arena-cell-layer { z-index: 1; }
+.arena-cell { touch-action: manipulation; outline: none; }
+.arena-cell:focus-visible { fill: #e3f3b9; fill-opacity: .35; stroke: #fffbd8; stroke-width: 4px; }
+.arena-cell.can-interact { cursor: crosshair; }
+.scene-sprite { position: absolute; pointer-events: none; }
+.gameplay-layers[data-paused=true] * { animation-play-state: paused !important; }
+.arena-control { width: 40px; height: 42px; border-radius: 8px; }
+.arena-control svg { width: 18px; height: 18px; }
+.arena-hud-top { gap: 6px; padding-inline: 8px; }
+.hud-sun {
+  display: flex; align-items: center; gap: 4px; flex-shrink: 0;
+  height: 46px; padding: 0 7px; border: 2px solid #66766d; border-radius: 10px;
+  background: linear-gradient(180deg, #50605a, #2e3b39);
+  box-shadow: inset 0 2px 5px #ffffff12, 0 2px 0 #10171366;
+}
+.hud-sun svg { width: 22px; height: 22px; }
+.hud-sun span {
+  font-family: var(--font-display); font-size: 23px; line-height: 1;
+  color: #ffe9a8; min-width: 30px; text-align: right;
+  text-shadow: 0 2px 0 #1b241c;
+}
+.hud-wave { min-width: 0; }
+.hud-wave > div:first-child { gap: 5px; }
+.hud-wave > div:first-child > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hud-settings { align-items: center; gap: 4px !important; }
+.seed-tray { width: 100%; height: 100%; }
+.seed-tray-heading {
+  display: flex; flex-direction: column; justify-content: center; flex-shrink: 0;
+  width: 64px; padding-right: 4px; color: #c7dba4;
+}
+.seed-tray-heading span { font: 400 11px/1 var(--font-display); letter-spacing: .1em; color: #8edbe8; }
+.seed-tray-heading strong { margin-top: 5px; font-size: 9px; line-height: 1.2; font-weight: 800; color: #dfe8c9; }
+@media (max-width: 760px) {
+  .arena-control { width: 35px; height: 38px; }
+  .arena-control svg { width: 16px; height: 16px; }
+  .hud-sun { height: 40px; padding: 0 6px; }
+  .hud-sun svg { width: 19px; height: 19px; }
+  .hud-sun span { font-size: 20px; min-width: 26px; }
+  .hud-settings { gap: 3px !important; }
+  .hud-wave > div:first-child > span:first-child { font-size: 11px !important; }
+  .hud-wave > div:first-child > span:last-child { font-size: 10px !important; }
+  .seed-tray { gap: 5px !important; }
+  .seed-tray-heading { display: none; }
+  .seed-tray button[data-seed] { width: clamp(48px, 14vw, 78px) !important; }
+  .seed-tray button[title^="Лопата"] { width: clamp(42px, 9vw, 58px) !important; }
+  .sun-pickup { z-index: 690; }
+}
+.mouse-pilot-layer {
+  position: absolute; inset: 0; z-index: 39; cursor: crosshair; touch-action: none;
+}
+.mouse-pilot-hint {
+  position: absolute; left: 50%; bottom: calc(var(--hud-bottom, 138px) + 72px); transform: translateX(-50%);
+  display: flex; gap: 14px; align-items: center; white-space: nowrap;
+  padding: 7px 14px; border-radius: 999px; border: 1px solid #bcdfe7a8;
+  background: #0d2229dd; color: #d8f4f2; font-size: 12px; font-weight: 800;
+  box-shadow: 0 4px 14px #08111477; pointer-events: none;
+}
+.mouse-pilot-hint span { display: inline-flex; align-items: center; gap: 6px; }
+.mouse-pilot-hint span:last-child { color: #ffdd8d; }
+.entity-health { position: absolute; left: 25%; top: -3px; width: 50%; height: 5px; border: 1px solid #2d3826; background: #293220a6; border-radius: 4px; overflow: hidden; }
+.entity-health i { display: block; height: 100%; }
+.sun-pickup { position: absolute; display: grid; place-items: center; width: 80px; height: 80px; transform: translate(-50%, -50%); border: 0; background: none; padding: 0; border-radius: 50%; }
+.sun-pickup:disabled { pointer-events: none; }
+.sun-pickup span { display: block; }
+.play-scenery { position: absolute; inset: -8px; background: url('/images/gardener-keyart.jpg') center/cover; filter: brightness(.28) saturate(.65) blur(6px); }
+.pause-resume, .pause-menu { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 24px auto 0; padding: 18px 34px; border-radius: 10px; font-size: 24px; }
+.pause-resume { background: #b4dd6c; color: #223a20; box-shadow: 0 5px #597d39; }
+.pause-menu { margin-top: 18px; padding: 14px 28px; border: 1.5px solid #d8e9b876; color: #e6ebd5; font-size: 20px; }
+.viewport-notice { position: absolute; z-index: 100; top: max(12px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); width: max-content; max-width: min(90vw, 510px); padding: 12px 18px; background: #173124f5; color: #f2f1d9; border: 1px solid #afc283; border-radius: 9px; font-size: 14px; text-align: center; pointer-events: none; }
